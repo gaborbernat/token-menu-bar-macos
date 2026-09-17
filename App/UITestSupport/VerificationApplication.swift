@@ -66,9 +66,12 @@ struct VerificationApplication {
     tab(title).click()
   }
 
+  /// `activate()` attaches a diagnostic screenshot, and that capture reads the display bounds through WindowServer,
+  /// which can stall past the whole execution allowance on a virtual machine, so it runs only when the application
+  /// left the foreground.
   func waitForPopover(timeout: TimeInterval) -> Bool {
     let deadline = ProcessInfo.processInfo.systemUptime + timeout
-    application.activate()
+    if application.state != .runningForeground { application.activate() }
     let ready = tab("Usage").wait(
       for: \.isHittable, toEqual: true,
       timeout: max(deadline - ProcessInfo.processInfo.systemUptime, 0))
