@@ -33,17 +33,28 @@ grep -Fq 'CI passed on 3d3c42e5aac5ba805825da76410c181273ba90b1' "$GITHUB_STEP_S
 
 echo '[{"status":"completed","conclusion":"failure"}]' > "$probe/runs.json"
 RUNS="$probe/runs.json" expect "a failing run stops the release" 1
-grep -Fq 'reports completed/failure' "$probe/err"
+grep -Fq 'concluded failure' "$probe/err"
 
 echo '[{"status":"in_progress","conclusion":null}]' > "$probe/runs.json"
 RUNS="$probe/runs.json" expect "an unfinished run stops the release" 1
-grep -Fq 'reports in_progress/none' "$probe/err"
+grep -Fq 'has not finished' "$probe/err"
 
 echo '[]' > "$probe/runs.json"
 RUNS="$probe/runs.json" expect "an untested commit stops the release" 1
-grep -Fq 'No CI run covers' "$probe/err"
+grep -Fq 'No CI run reached a verdict' "$probe/err"
 
 echo '[{"status":"completed","conclusion":"success"},{"status":"completed","conclusion":"failure"}]' > "$probe/runs.json"
 RUNS="$probe/runs.json" expect "the newest run decides" 0
+
+echo '[{"status":"completed","conclusion":"cancelled"},{"status":"completed","conclusion":"success"}]' > "$probe/runs.json"
+RUNS="$probe/runs.json" expect "a cancelled run defers to the verdict behind it" 0
+
+echo '[{"status":"completed","conclusion":"cancelled"},{"status":"completed","conclusion":"failure"}]' > "$probe/runs.json"
+RUNS="$probe/runs.json" expect "a cancelled run cannot hide a failure" 1
+grep -Fq 'concluded failure' "$probe/err"
+
+echo '[{"status":"completed","conclusion":"cancelled"}]' > "$probe/runs.json"
+RUNS="$probe/runs.json" expect "cancellation alone is no verdict" 1
+grep -Fq 'No CI run reached a verdict' "$probe/err"
 
 echo "commit verdict gate holds"
