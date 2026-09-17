@@ -31,8 +31,6 @@ if [ -z "$installer_sha" ]; then
   security find-identity -v
   exit 1
 fi
-echo "Exporting with installer certificate $installer_sha"
-security find-identity -v
 
 cat > "$out/export.plist" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>
