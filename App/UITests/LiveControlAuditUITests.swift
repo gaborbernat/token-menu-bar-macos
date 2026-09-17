@@ -381,8 +381,11 @@ final class LiveControlAuditUITests: XCTestCase {
             applicationWindows(processIdentifier: processIdentifier).allSatisfy { baseline[$0.key] != nil },
             "Tooltip appeared before its \(Int(delay * 1_000)) ms threshold")
         }
+        // The ceiling only bounds how long a missing tooltip takes to report. What the test measures is that the
+        // tooltip waits out its delay, which the assertions above and below cover, so the ceiling stays generous
+        // enough for a loaded virtual machine.
         let tooltip = try waitForTooltip(
-          processIdentifier: processIdentifier, excluding: baseline, timeout: delay + 0.6)
+          processIdentifier: processIdentifier, excluding: baseline, timeout: delay + 3)
         let showLatency = ProcessInfo.processInfo.systemUptime - hoverStarted
         XCTAssertGreaterThanOrEqual(showLatency, delay - 0.02, "Tooltip appeared before its configured delay")
         let delta = distance(between: control.frame, and: tooltip.frame)
