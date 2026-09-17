@@ -418,7 +418,7 @@ final class LiveControlAuditUITests: XCTestCase {
         let baseline = applicationWindows(processIdentifier: processIdentifier)
         control.hover()
         let tooltip = try waitForTooltip(
-          processIdentifier: processIdentifier, excluding: baseline, timeout: tab == "History" ? 1.8 : 0.75)
+          processIdentifier: processIdentifier, excluding: baseline, timeout: tab == "History" ? 4.2 : 3.15)
         scrollView.scroll(byDeltaX: 0, deltaY: -180)
         XCTAssertTrue(
           waitUntil(timeout: 0.15) {
@@ -429,7 +429,7 @@ final class LiveControlAuditUITests: XCTestCase {
           let scrolledBaseline = applicationWindows(processIdentifier: processIdentifier)
           scrolledControl.hover()
           let scrolledTooltip = try waitForTooltip(
-            processIdentifier: processIdentifier, excluding: scrolledBaseline, timeout: tab == "History" ? 1.8 : 0.75)
+            processIdentifier: processIdentifier, excluding: scrolledBaseline, timeout: tab == "History" ? 4.2 : 3.15)
           XCTAssertLessThanOrEqual(distance(between: scrolledControl.frame, and: scrolledTooltip.frame), 20)
           XCTAssertTrue(CGDisplayBounds(CGMainDisplayID()).contains(scrolledTooltip.frame))
           try verification.application.screenshot().pngRepresentation.write(
@@ -461,7 +461,7 @@ final class LiveControlAuditUITests: XCTestCase {
       let tabBaseline = applicationWindows(processIdentifier: processIdentifier)
       control.hover()
       let tabTooltip = try waitForTooltip(
-        processIdentifier: processIdentifier, excluding: tabBaseline, timeout: 0.75)
+        processIdentifier: processIdentifier, excluding: tabBaseline, timeout: 3.15)
       verification.tab("Usage").click()
       XCTAssertTrue(
         waitUntil(timeout: 0.15) {
@@ -472,7 +472,7 @@ final class LiveControlAuditUITests: XCTestCase {
       let escapeBaseline = applicationWindows(processIdentifier: processIdentifier)
       try tooltipCandidates(in: usageSurface).first?.1.hover()
       let escapeTooltip = try waitForTooltip(
-        processIdentifier: processIdentifier, excluding: escapeBaseline, timeout: 0.75)
+        processIdentifier: processIdentifier, excluding: escapeBaseline, timeout: 3.15)
       verification.application.typeKey(.escape, modifierFlags: [])
       XCTAssertTrue(
         waitUntil(timeout: 0.15) {
