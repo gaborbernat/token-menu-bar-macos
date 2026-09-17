@@ -23,6 +23,15 @@ app="$archive/Products/Applications/Token Menu Bar.app"
 Scripts/verify-deployment-targets.sh "$app" 14.0
 Scripts/verify-app-bundle.sh "$app" "App Store" forbidden
 
+# Xcode matches a certificate name against the common name, and the portal issues installer certificates under a name
+# it no longer shows, so the hash from the keychain is the only spelling that cannot drift.
+installer_sha="$(security find-certificate -a -c '3rd Party Mac Developer Installer' -Z | awk '/SHA-1 hash:/ {print $3; exit}')"
+if [ -z "$installer_sha" ]; then
+  echo "::error::The keychain search list holds no 3rd Party Mac Developer Installer certificate for $TEAM_ID"
+  security find-identity -v
+  exit 1
+fi
+
 cat > "$out/export.plist" << PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -33,9 +42,7 @@ cat > "$out/export.plist" << PLIST
   <key>teamID</key><string>${TEAM_ID}</string>
   <key>signingStyle</key><string>manual</string>
   <key>signingCertificate</key><string>Apple Distribution</string>
-  <!-- Xcode matches this against the certificate's common name, and the portal still issues installer certificates
-       under their old name even though it lists them as Mac Installer Distribution. -->
-  <key>installerSigningCertificate</key><string>3rd Party Mac Developer Installer</string>
+  <key>installerSigningCertificate</key><string>${installer_sha}</string>
   <key>provisioningProfiles</key>
   <dict>
     <key>dev.tox.token-menu-bar</key><string>${APP_PROFILE}</string>
