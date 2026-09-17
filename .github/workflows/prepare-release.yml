@@ -79,5 +79,7 @@ jobs:
     uses: ./.github/workflows/release.yml # zizmor: ignore[self-repository]
     with:
       tag: v${{ needs.tag.outputs.version }}
+    # A called workflow cannot exceed the permissions granted here, and the cask job opens a pull request.
     permissions:
       contents: write
+      pull-requests: write
