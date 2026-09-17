@@ -7,6 +7,8 @@ import XCTest
 struct VerificationApplication {
   typealias Appearance = VerificationProfile.Appearance
 
+  private static let bundleIdentifier = "dev.tox.token-menu-bar.verification"
+
   let application: XCUIApplication
   private let launchPolicy: LaunchPolicy
   private let session: String
@@ -66,12 +68,21 @@ struct VerificationApplication {
     tab(title).click()
   }
 
-  /// `activate()` attaches a diagnostic screenshot, and that capture reads the display bounds through WindowServer,
-  /// which can stall past the whole execution allowance on a virtual machine, so it runs only when the application
-  /// left the foreground.
+  /// `XCUIApplication.activate` attaches a diagnostic screenshot, and that capture reads the display bounds through
+  /// WindowServer, a request that can outlast the whole execution allowance on a virtual machine. AppKit raises the
+  /// same process without one, and a menu bar application reports the foreground only once its panel opens, so this
+  /// asks for activation rather than waiting on it.
+  func bringToFront() {
+    if let running = NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleIdentifier).first {
+      running.activate()
+    } else {
+      application.activate()
+    }
+  }
+
   func waitForPopover(timeout: TimeInterval) -> Bool {
     let deadline = ProcessInfo.processInfo.systemUptime + timeout
-    if application.state != .runningForeground { application.activate() }
+    bringToFront()
     let ready = tab("Usage").wait(
       for: \.isHittable, toEqual: true,
       timeout: max(deadline - ProcessInfo.processInfo.systemUptime, 0))
