@@ -33,7 +33,9 @@ cat > "$out/export.plist" << PLIST
   <key>teamID</key><string>${TEAM_ID}</string>
   <key>signingStyle</key><string>manual</string>
   <key>signingCertificate</key><string>Apple Distribution</string>
-  <key>installerSigningCertificate</key><string>Mac Installer Distribution</string>
+  <!-- Xcode matches this against the certificate's common name, and the portal still issues installer certificates
+       under their old name even though it lists them as Mac Installer Distribution. -->
+  <key>installerSigningCertificate</key><string>3rd Party Mac Developer Installer</string>
   <key>provisioningProfiles</key>
   <dict>
     <key>dev.tox.token-menu-bar</key><string>${APP_PROFILE}</string>
