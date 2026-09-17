@@ -181,7 +181,7 @@ final class LiveControlAuditUITests: XCTestCase {
     addTeardownBlock { @MainActor in await verification.terminate() }
     try verification.launch()
     XCTAssertTrue(verification.tabs.waitForExistence(timeout: 5))
-    verification.application.activate()
+    verification.bringToFront()
 
     let output = try outputDirectory()
     var records: [ControlAuditRecord] = []
@@ -1446,9 +1446,10 @@ final class LiveControlAuditUITests: XCTestCase {
 
   /// Hit testing spans every application on screen, so a window of the runner or of whichever application a native
   /// panel handed activation back to can cover a control this one still reports as visible.
+  ///
   @MainActor
   private func activate(_ application: XCUIApplication) {
-    application.activate()
+    if application.state != .runningForeground { application.activate() }
     XCTAssertTrue(
       waitUntil(timeout: controlTimeout) { application.state == .runningForeground },
       "The application left the foreground, so its controls cannot be reached")
