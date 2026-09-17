@@ -142,7 +142,8 @@ jobs:
           if [ -n "$published_tag" ]; then
             appcast="$RUNNER_TEMP/published-appcast.xml"
             gh release download "$published_tag" --pattern appcast.xml --output "$appcast"
-            published="$(sed -n 's:.*<sparkle:version>\([0-9][0-9]*\)</sparkle:version>.*:\1:p' "$appcast" | head -1)"
+            # The element name carries a colon, so the substitution needs a delimiter the markup cannot contain.
+            published="$(sed -n 's|.*<sparkle:version>\([0-9][0-9]*\)</sparkle:version>.*|\1|p' "$appcast" | head -1)"
             [[ "$current" =~ ^[0-9]+$ && "$published" =~ ^[0-9]+$ ]] || {
               echo "::error::Could not read numeric build numbers from git and $published_tag"
               exit 1
