@@ -102,6 +102,8 @@ jobs:
           Scripts/test-ui-test-inventory.sh
       - name: Verify deferred render checks
         run: Scripts/test-render-capture.sh
+      - name: Verify the release reads the commit verdict
+        run: bash Scripts/test-commit-verdict.sh
 
   package-compatibility:
     name: Package (${{ matrix.name }}, ${{ matrix.mode }})

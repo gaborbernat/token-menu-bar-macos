@@ -34,8 +34,12 @@ publishing two channels of three.
 
 Version 0.1.0 published on 2026-09-16 through the Direct and Homebrew channels. Pipeline configuration is not evidence
 that a later release or an App Store listing exists. Check the repository's releases and full PR CI matrix before
-declaring a build ready. Require the deployed macOS 14, 15 and 26 checks. Release UI tests cover macOS 26 and 27 only,
-so the older runtimes rest on the pull request matrix.
+declaring a build ready.
+
+The release runs no application tests of its own. It reads the CI verdict for the tagged commit and refuses to publish
+unless the newest run passed, so a tag carries the full matrix of macOS 14, 15, 26 and 27 rather than the two runtimes a
+release once repeated. Everything the release still checks concerns the artifact instead of behaviour: deployment
+targets, both architecture slices, Mach-O validity, updater load commands, notarization and the appcast signature.
 
 The three channels are separate Xcode application targets. Only Direct compiles and links `SparkleUpdater`; Homebrew and
 App Store do not link the Sparkle product and carry no Sparkle keys in `Info.plist`. Release verification checks both

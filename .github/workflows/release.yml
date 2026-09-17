@@ -34,19 +34,11 @@ jobs:
     environment: release
     outputs:
       app_store: ${{ steps.check.outputs.app_store }}
-      runtimes: ${{ steps.matrix.outputs.release }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ env.TAG }}
           persist-credentials: false
-      - name: Check macOS 27 deployment
-        id: matrix
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api repos/actions/runner-images/releases/tags/xcode-27-arm64%2F20260907.0173 | Scripts/ci-runtime-matrix.sh
       # A job cannot read secrets in its own `if`, so the release works out here which legs it can publish.
       # A tag that reaches only two of the three channels is a half-published release, so a missing credential stops
       # the run here rather than leaving the App Store behind without anyone noticing.
@@ -71,47 +63,18 @@ jobs:
             exit 1
           fi
           echo "app_store=true" >> "$GITHUB_OUTPUT"
-  runtime-tests:
-    name: Release UI tests (${{ matrix.name }} runtime)
-    needs: preflight
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.preflight.outputs.runtimes) }}
-    steps:
-      - name: Verify runtime
+      # Continuous integration already ran the application tests against this commit, on every runtime rather than the
+      # two a release once repeated, so the release reads that verdict instead of spending another forty minutes to
+      # cover less.
+      - name: Require a green commit
         env:
-          EXPECTED_MACOS_MAJOR: ${{ matrix.runtime-major }}
-        run: |
-          version="$(sw_vers -productVersion)"
-          [[ "${version%%.*}" == "$EXPECTED_MACOS_MAJOR" ]] || { echo "::error::Unexpected macOS $version"; exit 1; }
-          echo "Runtime: macOS $version" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ env.TAG }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
-        with:
-          version: 2026.9.3
-          cache: false
-      - name: Select Xcode
-        env:
-          MIN_XCODE_MAJOR: ${{ matrix.minimum-xcode }}
-          EXACT_XCODE_MAJOR: ${{ matrix.minimum-xcode }}
-        run: Scripts/select-xcode.sh
-      - name: Generate project
-        run: just xcode
-      - name: Test the running application
-        run: |
-          set -o pipefail
-          Scripts/with-test-desktop.sh xcodebuild -project App/TokenMenuBar.xcodeproj -scheme TokenMenuBar-Direct -configuration Verification \
-            -destination 'platform=macOS' -derivedDataPath .build/release-ui-derived \
-            -only-testing:TokenMenuBarApplicationUITests test | tail -50
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: Scripts/check-commit-verdict.sh "$TAG"
 
   direct:
     name: Direct and Homebrew downloads
-    needs: [preflight, runtime-tests]
+    needs: preflight
     runs-on: macos-26
     environment: release
     # This job publishes the release; the cask job opens its branch from a clean main checkout.
