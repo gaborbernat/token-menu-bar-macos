@@ -21,7 +21,4 @@ fi
 security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain"
 security list-keychains -d user -s "$keychain" login.keychain-db
 rm -f "$certificate" "$installer_certificate"
-# An installer certificate fails the codesigning policy, so that listing alone cannot show whether the keychain holds a
-# usable identity for packaging. The unfiltered listing names every certificate that found its private key.
 security find-identity -v -p codesigning "$keychain"
-security find-identity -v "$keychain"
