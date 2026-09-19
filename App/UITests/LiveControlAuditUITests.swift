@@ -1767,7 +1767,8 @@ final class LiveControlAuditUITests: XCTestCase {
       let frame = selected.frame
       let type = selected.elementType
       controls.removeAll { $0.frame == frame && $0.elementType == type }
-      return element(for: selected, in: surface, tree: snapshot)
+      let control = element(for: selected, in: surface, tree: snapshot)
+      return type == .stepper ? control.descendants(matching: .incrementArrow).firstMatch : control
     }
     return [
       ("top", take { $0.min { $0.frame.midY < $1.frame.midY } }),
