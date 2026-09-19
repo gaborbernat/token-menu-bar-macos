@@ -441,3 +441,14 @@ import TokenMenuBarTestSupport
     clickCount: 0, pressure: 0)!
   #expect(PopoverController(content: AnyView(Text("x"))).forward(event) === event)
 }
+
+@Test @MainActor func enablingAnUndiscoveredProviderChecksItsBoxAndOffersItsGrants() throws {
+  let environment = try makeEnvironment()
+  let tab = SettingsTab(environment: environment)
+  #expect(!tab.provider(.codex).wrappedValue)
+  tab.provider(.codex).wrappedValue = true
+  #expect(tab.provider(.codex).wrappedValue)
+  #expect(tab.isProviderEnabled(.codex))
+  tab.provider(.codex).wrappedValue = false
+  #expect(!tab.isProviderEnabled(.codex))
+}

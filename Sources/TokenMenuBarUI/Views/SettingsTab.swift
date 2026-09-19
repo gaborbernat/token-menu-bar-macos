@@ -386,9 +386,12 @@ public struct SettingsTab: View {
   }
 
   public func provider(_ provider: ProviderID) -> Binding<Bool> {
-    Binding(
-      get: { settings.isProviderActive(provider, state: environment.state.providers[provider]) },
-      set: { setProvider(provider, enabled: $0) })
+    Binding(get: { isProviderEnabled(provider) }, set: { setProvider(provider, enabled: $0) })
+  }
+
+  func isProviderEnabled(_ provider: ProviderID) -> Bool {
+    settings.providerOverride(for: provider)
+      ?? settings.isProviderActive(provider, state: environment.state.providers[provider])
   }
 
   var selection: [WindowKey] {
@@ -815,8 +818,7 @@ public struct SettingsTab: View {
         }
       }
       .padding(.leading, 30)
-      if environment.isSandboxed, settings.isProviderActive(providerID, state: environment.state.providers[providerID])
-      {
+      if environment.isSandboxed, isProviderEnabled(providerID) {
         ForEach(visibleResourceStates(providerID).filter { resourceNeedsGrant($0.health) }) { access in
           providerResourceRow(access, provider: providerID).padding(.leading, 30)
         }
