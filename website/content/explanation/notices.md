@@ -19,8 +19,9 @@ in the brands.
 
 The marks come from [Lobe Icons](https://github.com/lobehub/lobe-icons), version 1.95.0 of `@lobehub/icons-static-svg`,
 released under the MIT license. Claude and Gemini keep their original colors; the other marks are single-color and take
-the text color. Only the Gemini file differs from the published one: its path data has spaces between arc flags so macOS
-can draw it, and the shapes are unchanged. `provider-marks.json` in the source records each file's origin and hash.
+the text color. The files match the published ones except for a final newline, and the Gemini file also has spaces
+between its path's arc flags so macOS can draw it. The shapes are unchanged. `provider-marks.json` in the source records
+each file's origin and hash.
 
 ```text
 MIT License
