@@ -97,7 +97,8 @@ import TokenMenuBarTestSupport
   environment.actions.openURL = { opened.append($0) }
   tab.openRepository()
   tab.openPrivacyPolicy()
-  #expect(opened == [environment.appInfo.repository, AppInfo.privacyPolicyURL])
+  tab.openNotices()
+  #expect(opened == [environment.appInfo.repository, AppInfo.privacyPolicyURL, AppInfo.noticesURL])
   tab.grantAccess(ProviderID.codex.sandboxResources[0])
   var refreshedProviders: [ProviderID] = []
   environment.actions.refreshProvider = { refreshedProviders.append($0) }

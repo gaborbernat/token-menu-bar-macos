@@ -72,6 +72,8 @@ public struct AppInfo: Sendable, Equatable {
   /// The same address App Store Connect lists, so the policy is reachable from inside the app as well.
   public static let privacyPolicyURL = URL(
     string: "https://token-menu-bar-macos.readthedocs.io/en/latest/explanation/privacy/")!
+  public static let noticesURL = URL(
+    string: "https://token-menu-bar-macos.readthedocs.io/en/latest/explanation/notices/")!
 
   public static func from(bundle: Bundle, isAppStore: Bool) -> AppInfo {
     from(bundle: bundle, distribution: isAppStore ? .appStore : .direct)
