@@ -446,7 +446,7 @@ import TokenMenuBarTestSupport
 }
 
 @Test @MainActor func enablingAnUndiscoveredProviderChecksItsBoxAndOffersItsGrants() throws {
-  let environment = try makeEnvironment()
+  let environment = try makeEnvironment(populate: false)
   let tab = SettingsTab(environment: environment)
   #expect(!tab.provider(.codex).wrappedValue)
   tab.provider(.codex).wrappedValue = true
