@@ -98,7 +98,11 @@ import TokenMenuBarTestSupport
   tab.openRepository()
   tab.openPrivacyPolicy()
   tab.openNotices()
-  #expect(opened == [environment.appInfo.repository, AppInfo.privacyPolicyURL, AppInfo.noticesURL])
+  for provider in ProviderID.allCases { tab.openSetupGuide(provider) }
+  #expect(
+    opened
+      == [environment.appInfo.repository, AppInfo.privacyPolicyURL, AppInfo.noticesURL]
+      + ProviderID.allCases.map { AppInfo.setupGuideURL(for: $0) })
   tab.grantAccess(ProviderID.codex.sandboxResources[0])
   var refreshedProviders: [ProviderID] = []
   environment.actions.refreshProvider = { refreshedProviders.append($0) }

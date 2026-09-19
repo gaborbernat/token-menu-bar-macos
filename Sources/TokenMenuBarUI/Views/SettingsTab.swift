@@ -296,6 +296,10 @@ public struct SettingsTab: View {
     environment.actions.openURL(AppInfo.noticesURL)
   }
 
+  public func openSetupGuide(_ provider: ProviderID) {
+    environment.actions.openURL(AppInfo.setupGuideURL(for: provider))
+  }
+
   public func grantAccess(_ resource: SandboxResource) {
     environment.actions.grantAccess(resource)
   }
@@ -800,12 +804,14 @@ public struct SettingsTab: View {
           providerDetails(providerID, presentation: presentation, issue: issue)
           Spacer(minLength: 8)
           providerRecoveryButton(actionableRecoveryIssue(providerID), provider: providerID)
+          providerGuideButton(providerID)
         }
         .frame(minWidth: 520)
       } narrow: {
         VStack(alignment: .leading, spacing: 5) {
           providerDetails(providerID, presentation: presentation, issue: issue)
           providerRecoveryButton(actionableRecoveryIssue(providerID), provider: providerID)
+          providerGuideButton(providerID)
         }
       }
       .padding(.leading, 30)
@@ -919,6 +925,19 @@ public struct SettingsTab: View {
     .font(.caption)
     .semanticForeground(.secondary)
     .fixedSize(horizontal: false, vertical: true)
+  }
+
+  private func providerGuideButton(_ providerID: ProviderID) -> some View {
+    NativeActionButton("Setup guide") { openSetupGuide(providerID) }
+      .accessibilityIdentifier("provider-\(providerID.rawValue)-setup-guide")
+      .accessibilityLabel("\(providerID.displayName) setup guide")
+      .richHelp(
+        TooltipContent(
+          title: "\(providerID.displayName) setup guide",
+          body:
+            "Opens the \(providerID.displayName) page of the documentation in your default browser: which "
+            + "credentials the app reads and what macOS asks you to approve."
+        ))
   }
 
   @ViewBuilder private func providerRecoveryButton(_ issue: ProviderRecoveryIssue?, provider: ProviderID) -> some View {
