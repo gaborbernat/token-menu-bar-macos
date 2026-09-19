@@ -24,9 +24,27 @@ action, then press **Refresh**.
 **Authentication** names the source; **Connection details** adds the safe location and diagnostics. The app does not
 display the token.
 
-Background credential reads do not request Keychain interaction. A denied read appears in setup without repeated
-permission requests. App Store builds use **Grant** or **Grant Again** for supported local resources. Do not paste
-tokens into an issue or the app.
+Do not paste tokens into an issue or the app. Each provider page has a **What macOS asks** list for that client.
+
+## Keychain access
+
+Several clients keep their sign-in in the macOS login keychain. macOS guards each item with a list of trusted apps, and
+a client trusts only itself. The first time Token Menu Bar reads such an item, macOS shows a dialog that names the item
+and asks for your login keychain password:
+
+- **Always Allow** approves this app for that item.
+- **Allow** approves one read, so the dialog returns at the next poll.
+- **Deny** refuses. The app reports the denial in **Settings > Providers** and waits 30 minutes before it reads that
+  item again.
+
+The password goes to macOS; the app never sees it. A client that rewrites its item drops earlier approvals, so the
+dialog can return; [Claude](/reference/providers/claude/#what-macos-asks) does this when it renews its sign-in.
+
+## Folder grants
+
+The App Store build runs in the macOS sandbox and cannot open another app's files until you pick them. In **Settings >
+Providers** press **Grant**, or **Grant Again** after a folder moved, and confirm the folder the panel proposes. macOS
+remembers the choice. Direct and Homebrew builds need no grants.
 
 ## Custom credential paths
 
