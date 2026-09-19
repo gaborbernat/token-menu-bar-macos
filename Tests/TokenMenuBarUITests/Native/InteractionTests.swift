@@ -129,7 +129,7 @@ import TokenMenuBarTestSupport
   environment.settings.setProvider(.claude, enabled: false)
   #expect(tab.actionableRecoveryIssue(.claude) == nil)
   environment.settings.setProvider(.claude, enabled: true)
-  let resources = ProviderID.claude.sandboxResources
+  let resources = ProviderID.claude.sandboxResources + ProviderID.codex.sandboxResources
   environment.state.update(.claude) {
     $0.resourceAccess = [
       ResourceAccessState.notRequired(resources[0]), ResourceAccessState(resource: resources[1], health: .needed),
@@ -379,11 +379,6 @@ import TokenMenuBarTestSupport
   let configured = LiveDependencies.directoryPanel(
     ProviderID.codex.sandboxResources[0], paths: paths)
   #expect(configured.directoryURL?.resolvingSymlinksInPath() == configuredDirectory.resolvingSymlinksInPath())
-  let accountFile = LiveDependencies.directoryPanel(
-    ProviderID.claude.sandboxResources[1], paths: paths)
-  #expect(accountFile.canChooseFiles)
-  #expect(!accountFile.canChooseDirectories)
-  #expect(accountFile.directoryURL?.lastPathComponent != ".claude.json")
   #expect(codex.canChooseDirectories)
   #expect(!codex.canChooseFiles)
   #expect(codex.showsHiddenFiles)
@@ -426,7 +421,7 @@ import TokenMenuBarTestSupport
       $1(.cancel)
     })
   #expect(await nativeDirectory(ProviderID.codex.sandboxResources[0]) == nil)
-  #expect(await nativeDirectory(ProviderID.claude.sandboxResources[1]) == nil)
+  #expect(await nativeDirectory(ProviderID.gemini.sandboxResources[0]) == nil)
   #expect(openDirectories.compactMap { $0?.standardizedFileURL.path } == [support.path, support.path])
 
   var directDirectory: URL?

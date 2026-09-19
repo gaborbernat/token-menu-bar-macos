@@ -12,24 +12,15 @@ public struct SandboxResource: Sendable, Hashable, Identifiable {
     case prefix(String)
   }
 
-  public enum Kind: Sendable, Hashable {
-    case directory
-    case file
-  }
-
   public let id: String
   public let relativePath: String
   public let provider: ProviderID
-  public let kind: Kind
   public let override: Override?
 
-  public init(
-    id: String, relativePath: String, provider: ProviderID, kind: Kind = .directory, override: Override? = nil
-  ) {
+  public init(id: String, relativePath: String, provider: ProviderID, override: Override? = nil) {
     self.id = id
     self.relativePath = relativePath
     self.provider = provider
-    self.kind = kind
     self.override = override
   }
 
@@ -63,8 +54,7 @@ extension ProviderID {
     case .claude:
       [
         SandboxResource(
-          id: "claude.home", relativePath: ".claude", provider: self, override: .path("CLAUDE_CONFIG_DIR")),
-        SandboxResource(id: "claude.account", relativePath: ".claude.json", provider: self, kind: .file),
+          id: "claude.home", relativePath: ".claude", provider: self, override: .path("CLAUDE_CONFIG_DIR"))
       ]
     case .codex:
       [SandboxResource(id: "codex.home", relativePath: ".codex", provider: self, override: .path("CODEX_HOME"))]

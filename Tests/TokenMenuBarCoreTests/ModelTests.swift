@@ -395,10 +395,10 @@ func sandboxResourcesFollowTheirConfiguredLocation(id: String, environment: [Str
 }
 
 @Test func sandboxResourcesDescribeEveryProviderPath() {
-  #expect(ProviderID.allSandboxResources.count == 8)
-  #expect(ProviderID.claude.sandboxResources.map(\.kind) == [.directory, .file])
+  #expect(ProviderID.allSandboxResources.count == 7)
+  #expect(ProviderID.claude.sandboxResources.map(\.id) == ["claude.home"])
   #expect(ProviderID.allSandboxResources.allSatisfy { $0.label.hasPrefix("~/") })
-  #expect(Set(ProviderID.allSandboxResources.map(\.id)).count == 8)
+  #expect(Set(ProviderID.allSandboxResources.map(\.id)).count == 7)
 }
 
 @Test(
