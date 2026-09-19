@@ -122,8 +122,8 @@ Usage becomes a compact quota surface:
   accessibility value.
 - Provider setup and sign-in move to Settings > Providers. Undiscovered providers do not appear as missing Usage cards.
 - Usage-site URLs are removed from plan chips, provider cards, the status menu, and command handling.
-- Official provider marks appear in the card header where distribution permission exists. The common slot falls back to
-  the official provider name when it does not.
+- Provider marks appear in the card header beside the provider name. The common slot falls back to an initials badge
+  when the artwork is missing.
 - Cards use immutable Core presentation snapshots. A one-second clock does not rebuild 60-day analytics summaries.
 - Only leaf reset-age text observes a visible-only deadline clock.
 - Every quota row shows an expected-use marker on its meter and compact expected, ratio, and projection text. A status
@@ -203,12 +203,13 @@ compare the source after the network exchange so a rotated token cannot overwrit
 
 ### Provider marks
 
-The asset loader caches one decoded image per provider and appearance. Marks keep their original colors and are never
-template-tinted. Each vendored asset records its source, retrieval date, approval state, and required attribution.
+The asset loader caches one decoded image per provider and appearance. Claude and Gemini keep their original colors; the
+other marks are single-color glyphs tinted with the text color. Each vendored asset records its source, retrieval date,
+approval state and license in `provider-marks.json`, and a test checks every file against its recorded hash.
 
-The app bundles marks for the six providers. The asset manifest records upstream sources and usage restrictions,
-including the pinned Simple Icons archive used for Claude, Gemini, and GitHub Copilot. Antigravity uses Google's
-[full-color press artwork](https://antigravity.google/press), decoded to a 64-pixel thumbnail for the badge.
+The app bundles marks for the six providers from the pinned Lobe Icons package (MIT). The license covers the artwork and
+grants no rights in the brands, so About carries a trademark statement and links the notices page. When a provider
+challenges a mark, the initials badge (`fallbackText` in the catalog) renders instead of the artwork.
 
 ## History
 

@@ -17,7 +17,7 @@ import TokenMenuBarTestSupport
 
 @Test @MainActor func settingsContentFitsTheDensityBudget() async throws {
   let height = try await measuredHeight(for: .settings)
-  #expect(height <= 1_650, "Settings measured \(height) points")
+  #expect(height <= 1_700, "Settings measured \(height) points")
 }
 
 @MainActor

@@ -93,7 +93,12 @@ import TokenMenuBarTestSupport
   environment.actions.settingsReset = { resets += 1 }
   let tab = SettingsTab(environment: environment)
   environment.isDemo = true
+  var opened: [URL] = []
+  environment.actions.openURL = { opened.append($0) }
   tab.openRepository()
+  tab.openPrivacyPolicy()
+  tab.openNotices()
+  #expect(opened == [environment.appInfo.repository, AppInfo.privacyPolicyURL, AppInfo.noticesURL])
   tab.grantAccess(ProviderID.codex.sandboxResources[0])
   var refreshedProviders: [ProviderID] = []
   environment.actions.refreshProvider = { refreshedProviders.append($0) }

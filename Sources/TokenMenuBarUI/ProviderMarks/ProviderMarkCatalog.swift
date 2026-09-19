@@ -10,6 +10,7 @@ public struct ProviderMarkDescriptor: Equatable, Sendable {
   public let provider: ProviderID
   public let appearance: ProviderMarkAppearance
   public let resourceName: String
+  public let keepsOriginalColors: Bool
   public let fallbackText: String
   public let backgroundColor: BrandColor
   public let foregroundColor: BrandColor
@@ -25,6 +26,7 @@ public enum ProviderMarkCatalog {
       provider: provider,
       appearance: appearance,
       resourceName: resourceName(for: provider, appearance: appearance),
+      keepsOriginalColors: originalColorProviders.contains(provider),
       fallbackText: provider.shortLabel,
       backgroundColor: backgroundColor(for: provider, appearance: appearance),
       foregroundColor: foregroundColor(for: provider, appearance: appearance))
@@ -43,17 +45,18 @@ public enum ProviderMarkCatalog {
   }
 
   private static let resourceBundle = providerMarkResourceBundle
+  private static let originalColorProviders: Set<ProviderID> = [.claude, .gemini]
 
   private static func resourceName(
     for provider: ProviderID, appearance: ProviderMarkAppearance
   ) -> String {
     switch (provider, appearance) {
-    case (.codex, _): "OpenAI-white-monoblossom.svg"
-    case (.cursor, _): "CUBE_2D_DARK.svg"
-    case (.claude, _): "Claude.svg"
-    case (.gemini, _): "GoogleGemini.svg"
-    case (.copilot, _): "GitHubCopilot.svg"
-    case (.antigravity, _): "Antigravity.png"
+    case (.codex, _): "openai.svg"
+    case (.cursor, _): "cursor.svg"
+    case (.claude, _): "claude-color.svg"
+    case (.gemini, _): "gemini-color.svg"
+    case (.copilot, _): "githubcopilot.svg"
+    case (.antigravity, _): "antigravity.svg"
     }
   }
 
