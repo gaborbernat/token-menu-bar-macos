@@ -59,6 +59,16 @@ func launchPolicyYieldsToARunningInstanceOnlyForPlainLaunches(
   #expect(lookups == 0)
 }
 
+// A sandboxed relaunch arrives without `--relaunched`, so only the handshake tells the replacement to stay.
+@Test @MainActor func singleInstanceGuardLetsTheReplacementOfASandboxedRelaunchStart() {
+  let handedOff = SingleInstanceGuard.handOff(
+    policy: LaunchPolicy(arguments: ["TokenMenuBar"], environment: [:]),
+    replacing: NSRunningApplication.current.processIdentifier, bundleIdentifier: "dev.tox.token-menu-bar",
+    currentProcessIdentifier: 0, runningApplications: { _ in [.current] })
+
+  #expect(!handedOff)
+}
+
 @Test @MainActor func singleInstanceGuardConsultsTheRunningApplicationList() {
   let policy = LaunchPolicy(arguments: ["TokenMenuBar"], environment: [:])
 

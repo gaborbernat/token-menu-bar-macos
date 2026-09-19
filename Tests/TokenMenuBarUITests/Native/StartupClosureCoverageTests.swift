@@ -155,13 +155,14 @@ struct StartupClosureCoverageTests {
     application.delegate = terminator
     defer { application.delegate = previousDelegate }
     var opened = false
+    let defaults = testDefaults()
     let dependencies = try await LiveDependencies.makeDeferred(
       appInfo: testAppInfo,
       paths: LiveDependencies.Paths(
         home: root, supportDirectory: root.appendingPathComponent("support"),
         environment: ["TOKEN_MENU_BAR_DEMO": "1"], userName: "tester", arguments: [],
         verificationProfile: VerificationProfile(fixture: .standard)),
-      defaults: testDefaults(), notificationCenter: nil,
+      defaults: defaults, notificationCenter: nil,
       updater: nil, isSandboxed: false, transport: NoNetworkTransport(), keychain: testKeychain,
       launchAtLogin: .inMemory(),
       workspaceOpen: { _, configuration, completion in
@@ -181,6 +182,8 @@ struct StartupClosureCoverageTests {
     #expect(dependencies.settings.demoMode == launchFails)
     #expect(dependencies.log.text.contains("Could not relaunch") == launchFails)
     #expect(dependencies.log.text.contains("replacement launch completed") == !launchFails)
+    // a launched replacement still needs the handshake; a failed launch must not leave it for the next start
+    #expect(RelaunchHandshake.take(from: defaults) == (launchFails ? nil : ProcessInfo.processInfo.processIdentifier))
     #expect(visibleFrame == NSScreen.main?.visibleFrame)
   }
 

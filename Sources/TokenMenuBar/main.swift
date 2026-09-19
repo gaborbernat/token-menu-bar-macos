@@ -20,7 +20,7 @@ if let invocation = ExportInvocation.parse(CommandLine.arguments) {
 #else
   let launchPolicy = LaunchPolicy()
 #endif
-if SingleInstanceGuard.handOff(policy: launchPolicy) { exit(0) }
+if SingleInstanceGuard.handOff(policy: launchPolicy, replacing: RelaunchHandshake.take(from: .standard)) { exit(0) }
 let appInfo = AppInfo.from(bundle: .main, distribution: .direct)
 ApplicationMenu.install(on: NSApplication.shared, appName: appInfo.name)
 let paths =

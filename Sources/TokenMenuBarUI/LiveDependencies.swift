@@ -136,7 +136,7 @@ public enum LiveDependencies {
     let relaunchAction: @MainActor @Sendable () -> Void = {
       Self.relaunch(
         bundle: .main, policy: LaunchPolicy(arguments: paths.arguments, environment: paths.environment),
-        detailedLogging: settings.detailedLogging, open: workspaceOpen,
+        detailedLogging: settings.detailedLogging, settings: settings, open: workspaceOpen,
         onFailure: { error in
           settings.demoMode = isDemo
           log.logError("Could not relaunch: \(error.localizedDescription). Quit and reopen to try again.")
@@ -403,21 +403,27 @@ public enum LiveDependencies {
     bundle: Bundle,
     policy: LaunchPolicy = LaunchPolicy(),
     detailedLogging: Bool = false,
+    settings: TokenMenuBarCore.Settings,
+    processIdentifier: pid_t = ProcessInfo.processInfo.processIdentifier,
     open: WorkspaceOpen,
     onFailure: @escaping @MainActor @Sendable (any Error) -> Void,
     then terminate: @escaping @MainActor @Sendable () -> Void
   ) {
     let configuration = NSWorkspace.OpenConfiguration()
     configuration.createsNewApplicationInstance = true
+    // A sandboxed caller's arguments never arrive, so the replacement also learns it is one from the handshake.
     configuration.arguments = policy.relaunchArguments(detailedLogging: detailedLogging)
     configuration.environment = policy.relaunchEnvironment
+    settings.requestRelaunch(from: processIdentifier)
     open(bundle.bundleURL, configuration) { result in
       // AppKit's termination loop must leave the main dispatch queue free for asynchronous persistence.
       RunLoop.main.perform(inModes: [.common]) {
         MainActor.assumeIsolated {
           switch result {
           case .success: terminate()
-          case .failure(let error): onFailure(error)
+          case .failure(let error):
+            settings.withdrawRelaunch()
+            onFailure(error)
           }
         }
       }
