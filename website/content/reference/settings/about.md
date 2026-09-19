@@ -5,6 +5,7 @@ weight: 1
 ---
 
 - **Version** identifies the source build and distribution channel.
+- **Privacy Policy** opens the [privacy policy](/explanation/privacy/) in your default browser.
 - **Launch at login** registers the app with macOS. **Open Login Items**, on the same row, opens the approval pane.
 - **Demo data** starts off. It relaunches with generated providers; turn it off to return to your accounts.
 - Release Direct builds show **Check for updates automatically**, with **Check for Updates** in the footer. App Store,

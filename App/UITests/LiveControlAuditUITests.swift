@@ -849,7 +849,7 @@ final class LiveControlAuditUITests: XCTestCase {
       scenarioRecord(tab: "Settings", label: "Launch at login", element: launchAtLogin, action: "toggle twice"))
     for (label, identifier) in [
       ("Open Login Items", "Open Login Items"), ("Copy Diagnostics", "footer-copy-diagnostics"),
-      ("Source", "footer-source"),
+      ("Source", "footer-source"), ("Privacy Policy", "Privacy Policy"),
     ] {
       let button = application.buttons[identifier].firstMatch
       XCTAssertTrue(reveal(button, in: surface), "Missing About action \(label)")
@@ -1489,7 +1489,7 @@ final class LiveControlAuditUITests: XCTestCase {
       "History|Previous, next, and Now", "History|Custom From and To",
       "History|Export CSV save panel Cancel", "Settings|Version and build", "Settings|Distribution channel",
       "Settings|Reset All Settings Cancel", "Settings|Launch at login", "Settings|Open Login Items",
-      "Settings|Copy Diagnostics", "Settings|Report Issue", "Settings|Source",
+      "Settings|Copy Diagnostics", "Settings|Report Issue", "Settings|Source", "Settings|Privacy Policy",
       "Settings|Direct update controls", "Settings|Model order", "Settings|Status format", "Settings|Decimals",
       "Settings|Template and tokens", "Settings|Live menu bar preview", "Settings|Model filter",
       "Settings|Command-F model filter",
@@ -1525,7 +1525,7 @@ final class LiveControlAuditUITests: XCTestCase {
   private func settingsSection(for label: String) -> SettingsSection {
     switch label {
     case "Version and build", "Distribution channel", "Reset All Settings Cancel", "Launch at login",
-      "Open Login Items", "Copy Diagnostics", "Report Issue", "Source", "Direct update controls":
+      "Open Login Items", "Copy Diagnostics", "Report Issue", "Source", "Privacy Policy", "Direct update controls":
       return .about
     case "Show all providers", "Provider token refresh":
       return .providers

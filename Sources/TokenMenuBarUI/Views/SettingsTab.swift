@@ -288,6 +288,10 @@ public struct SettingsTab: View {
     environment.actions.openURL(environment.appInfo.repository)
   }
 
+  public func openPrivacyPolicy() {
+    environment.actions.openURL(AppInfo.privacyPolicyURL)
+  }
+
   public func grantAccess(_ resource: SandboxResource) {
     environment.actions.grantAccess(resource)
   }
@@ -408,6 +412,13 @@ public struct SettingsTab: View {
   private var about: some View {
     VStack(alignment: .leading, spacing: 7) {
       PanelRow("Version") { versionSummary }
+      PanelRow("Privacy") {
+        NativeActionButton("Privacy Policy", action: openPrivacyPolicy)
+          .richHelp(
+            TooltipContent(
+              title: "Privacy Policy",
+              body: "Opens the privacy policy in your default browser. Token Menu Bar collects no data."))
+      }
       PanelRow("Startup") {
         VStack(alignment: .leading, spacing: 4) {
           HStack(spacing: 8) {
