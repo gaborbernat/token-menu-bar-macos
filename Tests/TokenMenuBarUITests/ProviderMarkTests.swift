@@ -19,12 +19,20 @@ import TokenMenuBarTestSupport
 }
 
 @Test(arguments: ProviderID.allCases, ProviderMarkAppearance.allCases)
-@MainActor func providerMarkLoaderPreservesOriginalRendering(
+@MainActor func providerMarkLoaderTintsOnlyMonochromeArtwork(
   provider: ProviderID, appearance: ProviderMarkAppearance
 ) throws {
   let loader = ProviderMarkImageLoader()
   let image = try #require(loader.image(for: provider, appearance: appearance))
-  #expect(!image.isTemplate)
+  let keepsColors = ProviderMarkCatalog.descriptor(for: provider, appearance: appearance).keepsOriginalColors
+  #expect(image.isTemplate == !keepsColors)
+}
+
+@Test func providerMarkKeepsOriginalColorsForClaudeAndGeminiOnly() {
+  let kept = ProviderID.allCases.filter {
+    ProviderMarkCatalog.descriptor(for: $0, appearance: .light).keepsOriginalColors
+  }
+  #expect(Set(kept) == [.claude, .gemini])
 }
 
 @Test(arguments: ProviderID.allCases, ProviderMarkAppearance.allCases)
@@ -37,17 +45,8 @@ import TokenMenuBarTestSupport
   #expect(first === second)
 }
 
-@Test(arguments: ProviderMarkAppearance.allCases)
-@MainActor func providerMarkDownsamplesPublishedAntigravityArtwork(appearance: ProviderMarkAppearance) throws {
-  let descriptor = ProviderMarkCatalog.descriptor(for: .antigravity, appearance: appearance)
-  #expect(descriptor.resourceName == "Antigravity.png")
-  let image = try #require(ProviderMarkImageLoader().image(for: .antigravity, appearance: appearance))
-  #expect(image.size == CGSize(width: 64, height: 64))
-}
-
-@Test(arguments: ["svg", "png"]) @MainActor
-func providerMarkCachesUnreadableArtworkFailures(fileExtension: String) throws {
-  let url = FileManager.default.temporaryDirectory.appendingPathComponent("invalid-mark-\(UUID()).\(fileExtension)")
+@Test @MainActor func providerMarkCachesUnreadableArtworkFailures() throws {
+  let url = FileManager.default.temporaryDirectory.appendingPathComponent("invalid-mark-\(UUID()).svg")
   try Data("invalid image".utf8).write(to: url)
   defer { try? FileManager.default.removeItem(at: url) }
   var reads = 0
@@ -100,7 +99,7 @@ func providerMarkDescriptorsExposeReadableAccessibilityLabels(
 
 @Test func providerMarkMetadataRecordsApprovalAndSources() throws {
   let metadata = try providerMarkMetadata()
-  #expect(metadata.retrieved == "2026-09-01")
+  #expect(metadata.retrieved == "2026-09-18")
   for record in metadata.assets + metadata.fallbacks {
     #expect(!record.approvalState.isEmpty)
     #expect(record.sourcePage.scheme == "https")

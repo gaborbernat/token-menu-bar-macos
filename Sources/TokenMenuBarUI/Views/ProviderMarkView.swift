@@ -24,15 +24,17 @@ public struct ProviderMarkView: View {
     let appearance = ProviderMarkAppearance(colorScheme)
     let descriptor = ProviderMarkCatalog.descriptor(for: provider, appearance: appearance)
     ZStack {
-      RoundedRectangle(cornerRadius: min(5, size.height * 0.28), style: .continuous)
-        .fill(Color(descriptor.backgroundColor))
       if let image = imageLoader.image(for: provider, appearance: appearance) {
         Image(nsImage: image)
+          .renderingMode(descriptor.keepsOriginalColors ? .original : .template)
           .resizable()
           .interpolation(.high)
           .scaledToFit()
-          .padding(max(2, size.height * 0.18))
+          .foregroundStyle(.primary)
+          .padding(.vertical, 2)
       } else {
+        RoundedRectangle(cornerRadius: min(5, size.height * 0.28), style: .continuous)
+          .fill(Color(descriptor.backgroundColor))
         Text(descriptor.fallbackText)
           .font(.system(size: min(11, size.height * 0.55), weight: .semibold, design: .rounded))
           .lineLimit(1)

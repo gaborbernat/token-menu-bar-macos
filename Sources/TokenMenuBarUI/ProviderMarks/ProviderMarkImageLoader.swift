@@ -1,5 +1,4 @@
 import AppKit
-import ImageIO
 import TokenMenuBarCore
 
 @MainActor
@@ -26,25 +25,16 @@ public final class ProviderMarkImageLoader {
     let descriptor = ProviderMarkCatalog.descriptor(for: provider, appearance: appearance)
     guard
       let url = resourceURL(descriptor.resourceName),
-      let image = loadImage(at: url)
+      let image = NSImage(contentsOf: url)
     else {
       unavailable.insert(key)
       return nil
     }
-    image.isTemplate = false
+    // The icons declare a 1em size, which would rasterise at one point before scaling up.
+    image.size = NSSize(width: 24, height: 24)
+    image.isTemplate = !descriptor.keepsOriginalColors
     image.cacheMode = .always
     images[key] = image
     return image
-  }
-
-  private func loadImage(at url: URL) -> NSImage? {
-    guard url.pathExtension == "png" else { return NSImage(contentsOf: url) }
-    guard
-      let source = CGImageSourceCreateWithURL(url as CFURL, [kCGImageSourceShouldCache: false] as CFDictionary),
-      let image = CGImageSourceCreateThumbnailAtIndex(
-        source, 0,
-        [kCGImageSourceCreateThumbnailFromImageAlways: true, kCGImageSourceThumbnailMaxPixelSize: 64] as CFDictionary)
-    else { return nil }
-    return NSImage(cgImage: image, size: .zero)
   }
 }
