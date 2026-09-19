@@ -259,10 +259,12 @@ private enum ControllerExit: CaseIterable {
       == root.appendingPathComponent("widget.json"))
   #expect(LiveDependencies.widgetStore(supportDirectory: root).url.lastPathComponent == "widget.json")
   // a stub launcher, so the test never asks macOS to open a bundle
+  let defaults = testDefaults()
   let terminated = await withCheckedContinuation { continuation in
     LiveDependencies.relaunch(
-      bundle: .main,
+      bundle: .main, settings: TokenMenuBarCore.Settings(defaults: defaults), processIdentifier: 4242,
       open: { url, configuration, done in
+        #expect(RelaunchHandshake.take(from: defaults) == 4242)
         #expect(url == Bundle.main.bundleURL)
         #expect(configuration.createsNewApplicationInstance)
         #expect(configuration.arguments == [LaunchPolicy.relaunchedArgument])
@@ -299,7 +301,7 @@ private enum ControllerExit: CaseIterable {
   let policy = LaunchPolicy(arguments: ["--verify-ui"], environment: [:], verificationIdentifier: "relaunch")
   let terminated = await withCheckedContinuation { continuation in
     LiveDependencies.relaunch(
-      bundle: .main, policy: policy,
+      bundle: .main, policy: policy, settings: makeSettings(),
       open: { _, configuration, done in
         let replacement = LaunchPolicy(arguments: configuration.arguments, environment: configuration.environment)
         #expect(replacement.mode == .verification)
@@ -315,7 +317,7 @@ private enum ControllerExit: CaseIterable {
 @Test @MainActor func relaunchLeavesTheMainQueueAvailableForShutdown() async {
   let shutdownStarted = await withCheckedContinuation { continuation in
     LiveDependencies.relaunch(
-      bundle: .main, open: { _, _, done in done(.success(())) },
+      bundle: .main, settings: makeSettings(), open: { _, _, done in done(.success(())) },
       onFailure: { _ in continuation.resume(returning: false) }
     ) {
       var started = false

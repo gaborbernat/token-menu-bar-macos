@@ -272,6 +272,14 @@ public final class Settings {
     defaults.synchronize()
   }
 
+  public func requestRelaunch(from processIdentifier: Int32) {
+    RelaunchHandshake.request(from: processIdentifier, in: defaults)
+  }
+
+  public func withdrawRelaunch() {
+    RelaunchHandshake.withdraw(in: defaults)
+  }
+
   public func resetToDefaults() {
     shortLabelStoreTask?.cancel()
     shortLabelStoreTask = nil
