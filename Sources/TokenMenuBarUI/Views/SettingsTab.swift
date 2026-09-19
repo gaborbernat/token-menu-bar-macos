@@ -985,40 +985,49 @@ public struct SettingsTab: View {
   private func providerResourceRow(_ access: ResourceAccessState, provider: ProviderID) -> some View {
     ResponsivePanelLayout {
       HStack(spacing: 8) {
-        Text(access.resource.label).font(.caption)
-        Text(resourceText(access.health)).font(.caption).semanticForeground(.secondary)
+        resourceLabel(access)
+        Text(resourceText(access.health, need: access.resource.need)).font(.caption).semanticForeground(.secondary)
         Spacer(minLength: 8)
-        resourceGrantButton(access, provider: provider)
+        resourceGrantButton(access)
       }
       .frame(minWidth: 420)
     } narrow: {
       VStack(alignment: .leading, spacing: 4) {
         HStack(spacing: 8) {
-          Text(access.resource.label).font(.caption)
-          Text(resourceText(access.health)).font(.caption).semanticForeground(.secondary)
+          resourceLabel(access)
+          Text(resourceText(access.health, need: access.resource.need)).font(.caption).semanticForeground(.secondary)
         }
-        resourceGrantButton(access, provider: provider)
+        resourceGrantButton(access)
       }
     }
   }
 
-  @ViewBuilder private func resourceGrantButton(_ access: ResourceAccessState, provider: ProviderID) -> some View {
+  private func resourceLabel(_ access: ResourceAccessState) -> some View {
+    Text(access.resource.label).font(.caption)
+      .richHelp(
+        TooltipContent(title: "Why \(access.resource.label)?", body: access.resource.explanation))
+  }
+
+  @ViewBuilder private func resourceGrantButton(_ access: ResourceAccessState) -> some View {
     if resourceNeedsGrant(access.health) {
       NativeActionButton(resourceGrantTitle(access.health), action: resourceGrantAction(access.resource))
         .richHelp(
           TooltipContent(
             title: "Grant \(access.resource.label) access",
-            body:
-              "Opens a macOS file picker for this sandbox resource. "
-              + "Without access, \(provider.displayName) cannot read the local data it needs."
+            body: "Opens a macOS file picker for \(access.resource.label). \(access.resource.explanation)"
           ))
     }
   }
 
-  func resourceText(_ health: ResourceAccessHealth) -> String {
+  func resourceText(_ health: ResourceAccessHealth, need: SandboxResource.Need = .required) -> String {
     switch health {
     case .notRequired: "Not required"
-    case .needed: "Needed"
+    case .needed:
+      switch need {
+      case .required: "Needed"
+      case .optional: "Optional"
+      case .oneOf: "Grant the one you use"
+      }
     case .granted: "Granted"
     case .stale: "Stale"
     case .error(let detail): "Error: \(detail)"

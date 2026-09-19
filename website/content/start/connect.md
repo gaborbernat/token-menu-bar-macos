@@ -44,8 +44,10 @@ dialog can return; [Claude](/reference/providers/claude/#what-macos-asks) does t
 
 The App Store build runs in the macOS sandbox and cannot open another app's files until you pick them. In **Settings >
 Providers**, turn on **Show all providers** if yours is missing and check its enable box. Its **Grant** buttons appear
-then, one per folder the provider needs, so you pick only the folders you use. Confirm the folder the panel proposes;
-press **Grant Again** if a folder moved. macOS remembers the choice. Direct and Homebrew builds need no grants.
+then, one per folder the provider can use, so you pick only the folders you use. Each folder is labelled **Needed**,
+**Optional** (it adds History and costs, not quota) or **Grant the one you use** (any one of several is enough), and
+hovering its name explains why the app asks. Confirm the folder the panel proposes; press **Grant Again** if a folder
+moved. macOS remembers the choice. Direct and Homebrew builds need no grants.
 
 ## Custom credential paths
 

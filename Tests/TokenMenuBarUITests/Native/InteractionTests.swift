@@ -137,6 +137,9 @@ import TokenMenuBarTestSupport
   }
   #expect(tab.visibleResourceStates(.claude).map(\.resource) == [resources[1]])
   #expect(tab.resourceText(.notRequired) == "Not required")
+  #expect(tab.resourceText(.needed) == "Needed")
+  #expect(tab.resourceText(.needed, need: .optional) == "Optional")
+  #expect(tab.resourceText(.needed, need: .oneOf("cursor")) == "Grant the one you use")
   #expect(!tab.resourceNeedsGrant(.notRequired))
   tab.setThreshold(50, on: true)
   #expect(environment.settings.notifications.thresholds == [50, 75, 90, 100])

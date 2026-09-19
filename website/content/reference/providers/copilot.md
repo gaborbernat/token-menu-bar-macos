@@ -22,8 +22,9 @@ environment overrides.
 
 - **Keychain password**, when a `copilot-cli` Keychain item exists. The file sources need no password. See
   [Keychain access](/start/connect/#keychain-access).
-- **App Store build.** Grant `~/.copilot` and `~/.config/github-copilot` once; see
-  [folder grants](/start/connect/#folder-grants). A token in an environment variable needs no grant.
+- **App Store build.** Grant one folder, and only if the sign-in is not in the Keychain: `~/.copilot` for the Copilot
+  CLI or `~/.config/github-copilot` for the editor extensions. See [folder grants](/start/connect/#folder-grants). A
+  token in an environment variable needs no grant.
 
 ## Available data
 

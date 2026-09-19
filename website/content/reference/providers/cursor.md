@@ -17,8 +17,8 @@ read-only.
 ### What macOS asks
 
 - **No Keychain password.** Cursor keeps its session in files.
-- **App Store build.** Grant `~/Library/Application Support/Cursor` and `~/.cursor` once; see
-  [folder grants](/start/connect/#folder-grants).
+- **App Store build.** Grant the folder of the client you sign in with: `~/Library/Application Support/Cursor` for the
+  Cursor app or `~/.cursor` for `cursor-agent`. One is enough; see [folder grants](/start/connect/#folder-grants).
 
 ## Available data
 
