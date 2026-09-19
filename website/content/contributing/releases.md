@@ -5,16 +5,15 @@ weight: 7
 ---
 
 Run the **Prepare Release** workflow (`just release patch|minor|major`, or the Actions tab). It works out the next
-version from the newest tag and pushes `vX.Y.Z` with a token of its own, because a tag pushed with the default
-`GITHUB_TOKEN` starts no further workflow.
-
-That tag triggers **Release**, and one run publishes all three channels:
+version from the newest tag, pushes `vX.Y.Z`, and dispatches **Release** for that tag. A tag pushed with the default
+`GITHUB_TOKEN` starts no further workflow, and a called workflow would not receive the `release` environment's secrets,
+so the dispatch is what starts the build. One run of **Release** publishes all three channels:
 
 ```mermaid
 flowchart LR
     accTitle: What one tag publishes
-    accDescr: Prepare Release bumps the version and pushes a tag. The release builds separate Direct, Homebrew, and App Store applications. Direct includes Sparkle, Homebrew omits it, and App Store uses the sandboxed entitlement set.
-    P[Prepare Release<br/>bump and tag] --> T((tag vX.Y.Z))
+    accDescr: Prepare Release bumps the version, pushes a tag and dispatches the release. The release builds separate Direct, Homebrew, and App Store applications. Direct includes Sparkle, Homebrew omits it, and App Store uses the sandboxed entitlement set.
+    P[Prepare Release<br/>bump, tag, dispatch] --> T((tag vX.Y.Z))
     T --> D[Direct: Sparkle,<br/>Developer ID]
     T --> H[Homebrew: no Sparkle,<br/>Developer ID]
     T --> A[App Store:<br/>sandboxed upload]
