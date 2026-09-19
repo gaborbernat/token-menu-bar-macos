@@ -43,8 +43,9 @@ dialog can return; [Claude](/reference/providers/claude/#what-macos-asks) does t
 ## Folder grants
 
 The App Store build runs in the macOS sandbox and cannot open another app's files until you pick them. In **Settings >
-Providers** press **Grant**, or **Grant Again** after a folder moved, and confirm the folder the panel proposes. macOS
-remembers the choice. Direct and Homebrew builds need no grants.
+Providers**, turn on **Show all providers** if yours is missing and check its enable box. Its **Grant** buttons appear
+then, one per folder the provider needs, so you pick only the folders you use. Confirm the folder the panel proposes;
+press **Grant Again** if a folder moved. macOS remembers the choice. Direct and Homebrew builds need no grants.
 
 ## Custom credential paths
 

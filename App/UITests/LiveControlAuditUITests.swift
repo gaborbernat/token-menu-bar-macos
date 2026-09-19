@@ -931,6 +931,10 @@ final class LiveControlAuditUITests: XCTestCase {
     var resourceActions = 0
     for provider in ProviderID.allCases {
       let row = application.descendants(matching: .any)["\(provider.displayName) setup"]
+      let toggle = row.checkBoxes[provider.displayName]
+      XCTAssertTrue(reveal(toggle, in: surface), "Missing \(provider.displayName) provider row")
+      let wasEnabled = isSelected(toggle)
+      set(toggle, enabled: true)
       for action in row.buttons.matching(
         NSPredicate(format: "label IN %@", ["Copy command", "Check again", "Grant access", "Contact administrator"])
       ).allElementsBoundByIndex {
@@ -958,6 +962,7 @@ final class LiveControlAuditUITests: XCTestCase {
             tab: "Settings", label: "\(provider.displayName) resource \(action.label)", element: action,
             action: "open panel and Cancel"))
       }
+      set(toggle, enabled: wasEnabled)
     }
     XCTAssertEqual(recoveryActions, ProviderID.allCases.count, "Each provider must expose its recovery action")
     XCTAssertEqual(

@@ -815,7 +815,8 @@ public struct SettingsTab: View {
         }
       }
       .padding(.leading, 30)
-      if environment.isSandboxed {
+      if environment.isSandboxed, settings.isProviderActive(providerID, state: environment.state.providers[providerID])
+      {
         ForEach(visibleResourceStates(providerID).filter { resourceNeedsGrant($0.health) }) { access in
           providerResourceRow(access, provider: providerID).padding(.leading, 30)
         }
