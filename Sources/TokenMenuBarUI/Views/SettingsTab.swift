@@ -276,7 +276,7 @@ public struct SettingsTab: View {
       get: { settings.historyRetentionDays },
       set: {
         settings.historyRetentionDays = $0
-        environment.actions.settingsChanged()
+        environment.actions.historyRetentionChanged()
       })
   }
 

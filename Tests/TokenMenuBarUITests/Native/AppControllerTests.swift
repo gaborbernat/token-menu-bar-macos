@@ -541,6 +541,7 @@ func openingSettingsPreparesCurrentUsageBeforeItsHost(visible: Bool) throws {
   #expect(dependencies.log.text.contains("bookmark for ~/.codex failed"))
   actions.refresh()
   actions.settingsChanged()
+  actions.historyRetentionChanged()
 }
 
 @Test @MainActor func appControllerSurvivesHistoryFailures() async throws {
@@ -1027,4 +1028,21 @@ private final class ContrastFlag {
   defer { controller.stop() }
 
   #expect(!controller.retryOpening(remainingAttempts: 12, previousButtonFrame: nil, forcedNarrowest: false))
+}
+
+@Test @MainActor func appControllerAppliesRetentionWithoutRebuildingTheStatusItem() async throws {
+  let history = try UsageHistoryStore(url: nil)
+  try await history.record(
+    sampleSnapshot(.claude), now: fixedNow.addingTimeInterval(-10 * 86_400))
+  let clock = ManualClock()
+  let (dependencies, _) = try makeDependencies(history: history, clock: clock.clock)
+  let controller = AppController(dependencies: dependencies)
+  dependencies.settings.historyRetentionDays = 7
+
+  controller.environment.actions.historyRetentionChanged()
+  await clock.advance(by: AppController.retentionDebounce) {
+    dependencies.log.text.contains("history retention updated days=7")
+  }
+
+  #expect(try await history.stats().sampleCount == 0)
 }

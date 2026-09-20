@@ -27,6 +27,7 @@ import TokenMenuBarTestSupport
   actions.checkForUpdates()
   actions.quit()
   actions.settingsChanged()
+  actions.historyRetentionChanged()
   actions.settingsReset()
   actions.setDemoMode(true)
   // the defaults are placeholders: none of them may reach settings, the log or the pasteboard
@@ -88,8 +89,10 @@ import TokenMenuBarTestSupport
 @Test @MainActor func settingsTabBindingsAndMutations() throws {
   let environment = try makeEnvironment()
   var changes = 0
+  var retentionChanges = 0
   var resets = 0
   environment.actions.settingsChanged = { changes += 1 }
+  environment.actions.historyRetentionChanged = { retentionChanges += 1 }
   environment.actions.settingsReset = { resets += 1 }
   let tab = SettingsTab(environment: environment)
   environment.isDemo = true
@@ -150,7 +153,8 @@ import TokenMenuBarTestSupport
   #expect(environment.settings.historyRetentionDays == 90)
   tab.resetDefaults()
   #expect(environment.settings.windowOrder == .provider)
-  #expect(changes == 5)
+  #expect(changes == 4)
+  #expect(retentionChanges == 1)
   #expect(resets == 1)
   let log = LogSection(environment: environment)
   log.setDetailedLogging(true)
