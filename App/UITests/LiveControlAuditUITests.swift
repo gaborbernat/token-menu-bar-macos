@@ -479,8 +479,7 @@ final class LiveControlAuditUITests: XCTestCase {
           applicationWindows(processIdentifier: processIdentifier)[escapeTooltip.identifier] == nil
         }, "Escape did not dismiss the tooltip immediately")
       XCTAssertTrue(verification.tabs.waitForNonExistence(timeout: 2), "Escape did not close the popup")
-      verification.openPopover()
-      XCTAssertTrue(verification.tabs.waitForExistence(timeout: 2))
+      XCTAssertTrue(verification.reopenPopover())
     }
     print("TOOLTIP_AUDIT=\(output.path)")
   }

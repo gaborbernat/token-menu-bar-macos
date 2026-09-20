@@ -63,8 +63,7 @@ final class TokenMenuBarApplicationUITests: XCTestCase {
     verification.application.typeKey(.escape, modifierFlags: [])
     XCTAssertTrue(verification.tabs.waitForNonExistence(timeout: 2))
 
-    verification.openPopover()
-    XCTAssertTrue(verification.tabs.waitForExistence(timeout: 2))
+    XCTAssertTrue(verification.reopenPopover())
   }
 
   @MainActor
@@ -135,8 +134,7 @@ final class TokenMenuBarApplicationUITests: XCTestCase {
       verification.tab(tab).click()
       verification.application.typeKey(.escape, modifierFlags: [])
       XCTAssertTrue(verification.tabs.waitForNonExistence(timeout: 2))
-      verification.openPopover()
-      XCTAssertTrue(verification.tabs.waitForExistence(timeout: 2))
+      XCTAssertTrue(verification.reopenPopover())
     }
   }
 
@@ -177,8 +175,7 @@ final class TokenMenuBarApplicationUITests: XCTestCase {
     let reopeningSampler = WindowFrameSampler(processIdentifier: try verification.processIdentifier())
     reopeningSampler.start()
     defer { _ = reopeningSampler.stop() }
-    verification.openPopover()
-    XCTAssertTrue(verification.tabs.waitForExistence(timeout: 10))
+    XCTAssertTrue(verification.reopenPopover())
     let reopening = reopeningSampler.stop()
     let reopenedFrame = try XCTUnwrap(reopening.last?.frame)
     for sample in reopening {
