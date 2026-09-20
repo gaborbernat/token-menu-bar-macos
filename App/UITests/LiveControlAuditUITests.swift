@@ -6,6 +6,9 @@ import XCTest
 
 final class LiveControlAuditUITests: XCTestCase {
   private let controlTimeout = 5.0
+  // A provider's All checkbox changes several rows at once and re-renders the whole model list, which the 1024x768
+  // runners settle in about four seconds when idle and in more than five when they are busy.
+  private let groupChangeTimeout = 20.0
 
   override func tearDownWithError() throws {
     let directory = try outputDirectory()
@@ -174,7 +177,7 @@ final class LiveControlAuditUITests: XCTestCase {
   private func auditControls(
     tab: String, section: SettingsSection? = nil, modelSelectionOnly: Bool = false
   ) throws {
-    executionTimeAllowance = 300
+    executionTimeAllowance = 600
     let verification = VerificationApplication(
       testName: name, profile: VerificationProfile(fixture: .controlAudit, nativePanels: true),
       detailedLogging: tab == "History" || section == .menuBar)
@@ -1223,13 +1226,13 @@ final class LiveControlAuditUITests: XCTestCase {
     let selected = !before.values.allSatisfy { $0 }
     toggle.click()
     XCTAssertTrue(
-      waitUntil(timeout: controlTimeout) {
+      waitUntil(timeout: groupChangeTimeout) {
         (try? self.modelSelectionStates(provider, in: surface)) == before.mapValues { _ in selected }
       })
     XCTAssertTrue(reveal(toggle, in: surface), "Cannot reach \(provider.displayName) model select-all after selection")
     toggle.click()
     XCTAssertTrue(
-      waitUntil(timeout: controlTimeout) {
+      waitUntil(timeout: groupChangeTimeout) {
         (try? self.modelSelectionStates(provider, in: surface)) == before.mapValues { _ in !selected }
       })
     for identifier in before.keys.sorted() where before[identifier] != !selected {
