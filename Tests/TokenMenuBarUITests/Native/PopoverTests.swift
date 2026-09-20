@@ -887,3 +887,20 @@ private func descendant<View: NSView>(_ type: View.Type, in root: NSView) -> Vie
   if let root = root as? View { return root }
   return root.subviews.lazy.compactMap { descendant(type, in: $0) }.first
 }
+
+@Test @MainActor func popoverChromeStaysTheSameWhenReopenedAtAnotherSize() throws {
+  let (controller, anchorView, anchorWindow) = anchoredPopover()
+  defer { anchorWindow.orderOut(nil) }
+  let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+  let anchorFrame = anchorWindow.frame
+  controller.measure(PopoverMeasurement(tab: .usage, size: CGSize(width: 880, height: 5000)))
+  controller.show(relativeTo: anchorView, anchorFrame: anchorFrame, visibleFrame: screen)
+  let firstChrome = controller.popoverChromeSize
+  controller.close()
+
+  controller.measure(PopoverMeasurement(tab: .usage, size: CGSize(width: 880, height: 300)))
+  controller.show(relativeTo: anchorView, anchorFrame: anchorFrame, visibleFrame: screen)
+  defer { controller.close() }
+  #expect(abs(controller.popoverChromeSize.height - firstChrome.height) < 0.5)
+  #expect(abs(controller.popoverChromeSize.width - firstChrome.width) < 0.5)
+}

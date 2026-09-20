@@ -209,7 +209,9 @@ public final class PopoverController: NSObject, NSPopoverDelegate {
   public func popoverWillShow(_ notification: Notification) {
     guard isOpening else { return }
     let window = hosting.view.window!
-    let contentSize = hosting.view.frame.size
+    // The window is already sized for `popover.contentSize`; the hosting view may still hold the previous session's
+    // size until its next layout, and measuring against that counted the arrow twice and shrank the reopened panel.
+    let contentSize = popover.contentSize
     popoverChromeSize = CGSize(
       width: max(window.frame.width - contentSize.width, 0),
       height: max(window.frame.height - contentSize.height, 0))
