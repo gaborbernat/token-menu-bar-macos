@@ -389,7 +389,8 @@ enum ClaudeMapper {
     if response.extraUsage?.spendLimitReached == true {
       notices.append(Notice(kind: .spendControl, text: "Monthly usage-credit spend limit reached."))
     }
-    for limit in response.limits.filter({ Severity(raw: $0.severity) == .critical }) {
+    // Anthropic marks a window critical well before it is spent, so the severity alone would call 96% a reached limit.
+    for limit in response.limits.filter({ $0.percent >= 100 }) {
       let window = window(limit)
       notices.append(
         Notice(

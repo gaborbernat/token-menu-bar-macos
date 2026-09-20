@@ -41,6 +41,20 @@ import TokenMenuBarTestSupport
   #expect(ClaudeMapper.notices(response, now: fixedNow).map(\.text) == ["Current session limit reached."])
 }
 
+@Test func claudeCriticalSeverityBelowTheLimitRaisesNoLimitNotice() throws {
+  let response = try decodeClaudeUsage(
+    #"{"limits":[{"kind":"weekly_all","percent":96,"severity":"critical"}]}"#)
+
+  #expect(ClaudeMapper.notices(response, now: fixedNow).isEmpty)
+}
+
+@Test func claudeWindowAtItsLimitRaisesTheNoticeWhateverItsSeverity() throws {
+  let response = try decodeClaudeUsage(
+    #"{"limits":[{"kind":"weekly_all","percent":100,"severity":"normal"}]}"#)
+
+  #expect(ClaudeMapper.notices(response, now: fixedNow).map(\.text) == ["All models limit reached."])
+}
+
 @Test func nestedCoverageClaudeProfileFallsBackToItsExpiredCache() async throws {
   let transport = NestedCoverageClaudeTransport()
   let provider = ClaudeProvider(
