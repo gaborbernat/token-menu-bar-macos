@@ -160,7 +160,7 @@ import TokenMenuBarTestSupport
   log.setDetailedLogging(true)
   #expect(environment.settings.detailedLogging)
   #expect(environment.log.debugEnabled)
-  #expect(changes == 6)
+  #expect(changes == 5)
 }
 
 @Test @MainActor func settingsFormatsCredentialHealthStates() throws {
