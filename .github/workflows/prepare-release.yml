@@ -67,19 +67,21 @@ jobs:
         env:
           NEXT: ${{ steps.version.outputs.next }}
         run: |
-          echo "Tagged v$NEXT. Release builds the direct download, the cask and the App Store upload." \
-            >> "$GITHUB_STEP_SUMMARY"
+          echo "Tagged v$NEXT. The next job dispatches Release, which builds the direct download, the cask and the App" \
+            "Store upload." >> "$GITHUB_STEP_SUMMARY"
 
-  # A tag pushed with GITHUB_TOKEN starts no workflow of its own, so the release runs here rather than waiting for
-  # the tag event. One run, one place to watch.
+  # A tag pushed with GITHUB_TOKEN starts no workflow of its own, so this dispatches the release instead. Calling it as a
+  # reusable workflow would leave its jobs without the `release` environment's secrets; a dispatched run reads them.
   release:
-    name: Release
+    name: Start the release
     needs: tag
-    # Actionlint 1.7.12 rejects $/ references: https://github.com/rhysd/actionlint/issues/711
-    uses: ./.github/workflows/release.yml # zizmor: ignore[self-repository]
-    with:
-      tag: v${{ needs.tag.outputs.version }}
-    # A called workflow cannot exceed the permissions granted here, and the cask job opens a pull request.
+    runs-on: ubuntu-24.04
     permissions:
-      contents: write
-      pull-requests: write
+      actions: write
+    steps:
+      - name: Dispatch the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TAG: v${{ needs.tag.outputs.version }}
+        run: gh workflow run release.yml --repo "$REPOSITORY" --ref "$TAG" --field tag="$TAG"
