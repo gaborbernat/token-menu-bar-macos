@@ -6,6 +6,9 @@ import XCTest
 
 final class LiveControlAuditUITests: XCTestCase {
   private let controlTimeout = 5.0
+  // A provider's All checkbox changes several rows at once and re-renders the whole model list, which the 1024x768
+  // runners settle in about four seconds when idle and in more than five when they are busy.
+  private let groupChangeTimeout = 20.0
 
   override func tearDownWithError() throws {
     let directory = try outputDirectory()
@@ -174,7 +177,7 @@ final class LiveControlAuditUITests: XCTestCase {
   private func auditControls(
     tab: String, section: SettingsSection? = nil, modelSelectionOnly: Bool = false
   ) throws {
-    executionTimeAllowance = 300
+    executionTimeAllowance = 600
     let verification = VerificationApplication(
       testName: name, profile: VerificationProfile(fixture: .controlAudit, nativePanels: true),
       detailedLogging: tab == "History" || section == .menuBar)
@@ -476,8 +479,7 @@ final class LiveControlAuditUITests: XCTestCase {
           applicationWindows(processIdentifier: processIdentifier)[escapeTooltip.identifier] == nil
         }, "Escape did not dismiss the tooltip immediately")
       XCTAssertTrue(verification.tabs.waitForNonExistence(timeout: 2), "Escape did not close the popup")
-      verification.openPopover()
-      XCTAssertTrue(verification.tabs.waitForExistence(timeout: 2))
+      XCTAssertTrue(verification.reopenPopover())
     }
     print("TOOLTIP_AUDIT=\(output.path)")
   }
@@ -1223,21 +1225,49 @@ final class LiveControlAuditUITests: XCTestCase {
     let selected = !before.values.allSatisfy { $0 }
     toggle.click()
     XCTAssertTrue(
-      waitUntil(timeout: controlTimeout) {
-        (try? self.modelSelectionStates(provider, in: surface)) == before.mapValues { _ in selected }
-      })
+      waitUntil(timeout: groupChangeTimeout) {
+        self.revealedModelStates(identifiers, application: application, surface: surface)
+          == before.mapValues { _ in selected }
+      },
+      "Selecting \(provider.displayName) left \(diagnosticStates(provider, identifiers, application, surface))")
     XCTAssertTrue(reveal(toggle, in: surface), "Cannot reach \(provider.displayName) model select-all after selection")
     toggle.click()
     XCTAssertTrue(
-      waitUntil(timeout: controlTimeout) {
-        (try? self.modelSelectionStates(provider, in: surface)) == before.mapValues { _ in !selected }
-      })
+      waitUntil(timeout: groupChangeTimeout) {
+        self.revealedModelStates(identifiers, application: application, surface: surface)
+          == before.mapValues { _ in !selected }
+      },
+      "Clearing \(provider.displayName) left \(diagnosticStates(provider, identifiers, application, surface))")
     for identifier in before.keys.sorted() where before[identifier] != !selected {
       let model = application.checkBoxes[identifier]
       XCTAssertTrue(reveal(model, in: surface))
       model.click()
     }
-    XCTAssertEqual(try modelSelectionStates(provider, in: surface), before)
+    XCTAssertEqual(revealedModelStates(identifiers, application: application, surface: surface), before)
+  }
+
+  /// Reads each row after scrolling it into view: a snapshot of the whole surface can hold stale values for rows
+  /// that are off screen, which made the group checks fail although the toggle had worked.
+  @MainActor
+  private func revealedModelStates(
+    _ identifiers: [String], application: XCUIApplication, surface: XCUIElement
+  ) -> [String: Bool]? {
+    var states: [String: Bool] = [:]
+    for identifier in identifiers {
+      let model = application.checkBoxes[identifier]
+      guard reveal(model, in: surface) else { return nil }
+      states[identifier] = isSelected(model)
+    }
+    return states
+  }
+
+  @MainActor
+  private func diagnosticStates(
+    _ provider: ProviderID, _ identifiers: [String], _ application: XCUIApplication, _ surface: XCUIElement
+  ) -> String {
+    let snapshot = (try? modelSelectionStates(provider, in: surface)).map { "\($0)" } ?? "unreadable"
+    let revealed = revealedModelStates(identifiers, application: application, surface: surface).map { "\($0)" }
+    return "snapshot=\(snapshot) revealed=\(revealed ?? "unreachable")"
   }
 
   @MainActor

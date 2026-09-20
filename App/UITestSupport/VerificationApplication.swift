@@ -100,10 +100,34 @@ struct VerificationApplication {
   var supportDirectory: URL { launchPolicy.supportDirectory! }
 
   func openPopover() {
-    if NSScreen.screens.contains(where: { $0.frame.intersects(statusItem.frame) }) {
+    if statusItemIsOnScreen {
       statusItem.click()
       return
     }
+    requestPopoverOpen()
+  }
+
+  /// Opens the popover and waits for it. The app ignores an open request while a closing popover still counts as
+  /// shown, so on a slow runner a burst sent right after Escape can arrive too early; the request is idempotent, so it
+  /// is repeated until the tabs appear. Clicking the status item toggles, so that path is sent once.
+  @discardableResult func reopenPopover(timeout: TimeInterval = 10) -> Bool {
+    if statusItemIsOnScreen {
+      statusItem.click()
+      return tabs.waitForExistence(timeout: timeout)
+    }
+    let deadline = ProcessInfo.processInfo.systemUptime + timeout
+    repeat {
+      requestPopoverOpen()
+      if tabs.waitForExistence(timeout: 1.5) { return true }
+    } while ProcessInfo.processInfo.systemUptime < deadline
+    return false
+  }
+
+  private var statusItemIsOnScreen: Bool {
+    NSScreen.screens.contains { $0.frame.intersects(statusItem.frame) }
+  }
+
+  private func requestPopoverOpen() {
     for _ in 0..<5 {
       DistributedNotificationCenter.default().postNotificationName(
         LaunchPolicy.verificationOpenPopoverNotification,

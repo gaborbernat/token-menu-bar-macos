@@ -256,6 +256,7 @@ public final class AppController {
       quit: { [weak self] in self?.dependencies.terminate() },
       setDemoMode: { [weak self] in self?.setDemoMode($0) },
       settingsChanged: { [weak self] in self?.settingsChanged() },
+      historyRetentionChanged: { [weak self] in self?.applyHistoryRetention() },
       settingsReset: { [weak self] in Task { await self?.settingsReset() } }
     )
   }
@@ -676,6 +677,12 @@ public final class AppController {
     if shouldRequestNotifications { Task { await dependencies.notifier.requestAuthorization() } }
     statusItem?.adaptive = dependencies.settings.adaptiveWidth
     coordinator.rebuildStatus()
+    applyHistoryRetention()
+  }
+
+  /// Retention needs none of the status item work in `settingsChanged`; a stepper that blocks the main thread for
+  /// that long makes NSStepper auto-repeat while the mouse button is still down.
+  public func applyHistoryRetention() {
     let retentionDays = dependencies.settings.historyRetentionDays
     retentionTask?.cancel()
     retentionGeneration += 1

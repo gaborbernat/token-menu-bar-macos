@@ -22,6 +22,7 @@ public struct UIActions {
   public var quit: () -> Void
   public var setDemoMode: (Bool) -> Void
   public var settingsChanged: () -> Void
+  public var historyRetentionChanged: () -> Void
   public var settingsReset: () -> Void
 
   public init(
@@ -44,6 +45,7 @@ public struct UIActions {
     quit: @escaping () -> Void = {},
     setDemoMode: @escaping (Bool) -> Void = { _ in },
     settingsChanged: @escaping () -> Void = {},
+    historyRetentionChanged: @escaping () -> Void = {},
     settingsReset: @escaping () -> Void = {}
   ) {
     self.refresh = refresh
@@ -65,6 +67,7 @@ public struct UIActions {
     self.quit = quit
     self.setDemoMode = setDemoMode
     self.settingsChanged = settingsChanged
+    self.historyRetentionChanged = historyRetentionChanged
     self.settingsReset = settingsReset
   }
 }
@@ -78,6 +81,7 @@ public final class UIEnvironment {
   public let historyPresenter: HistoryPresenter
   public let spendSummary = SpendSummaryModel()
   public let disclosures = DisclosureState()
+  let stagedSelection = StagedSelectionChanges()
   public let log: LogBuffer
   public let appInfo: AppInfo
   public let clock: Clock
