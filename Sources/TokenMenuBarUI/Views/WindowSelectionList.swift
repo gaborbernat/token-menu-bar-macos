@@ -12,6 +12,11 @@ public struct SettingsModelFocusRequest: Equatable, Identifiable {
   }
 }
 
+@MainActor final class StagedSelectionChanges {
+  var changes: [(key: WindowKey, on: Bool)] = []
+  var flushPending = false
+}
+
 public struct WindowSelectionList: View {
   @Bindable var environment: UIEnvironment
   @Binding private var highlightedKey: WindowKey?
@@ -47,6 +52,7 @@ public struct WindowSelectionList: View {
   }
 
   private var settings: TokenMenuBarCore.Settings { environment.settings }
+  private var staged: StagedSelectionChanges { environment.stagedSelection }
 
   var rows: [(key: WindowKey, window: QuotaWindow)] {
     orderedProviders.flatMap { provider in
@@ -238,7 +244,7 @@ public struct WindowSelectionList: View {
   }
 
   private func providerSelection(_ group: SettingsProviderGroup) -> some View {
-    let bindings = providerKeys(group.provider).map(selectionBinding)
+    let bindings = providerKeys(group.provider).map(groupSelectionBinding)
     return Toggle(sources: bindings, isOn: \.self) { Text("All") }
       .toggleStyle(.checkbox)
       .disabled(selection.count == group.selectedCount && group.selection == .all)
@@ -624,11 +630,37 @@ public struct WindowSelectionList: View {
   }
 
   func toggle(_ key: WindowKey, on: Bool) {
+    apply([(key, on)])
+  }
+
+  /// A provider's All checkbox sets one binding per model in the same update. Applying them together does the status
+  /// item work once instead of once per model, which held the main thread long enough to stall the UI tests.
+  func groupSelectionBinding(_ key: WindowKey) -> Binding<Bool> {
+    Binding(get: { selection.contains(key) }, set: { stage(key, on: $0) })
+  }
+
+  func stage(_ key: WindowKey, on: Bool) {
+    staged.changes.append((key, on))
+    guard !staged.flushPending else { return }
+    staged.flushPending = true
+    Task { @MainActor in flushStagedChanges() }
+  }
+
+  func flushStagedChanges() {
+    let changes = staged.changes
+    staged.changes = []
+    staged.flushPending = false
+    apply(changes)
+  }
+
+  private func apply(_ changes: [(key: WindowKey, on: Bool)]) {
     var keys = selection
-    if on {
-      if !keys.contains(key) { keys.append(key) }
-    } else if keys.count > 1 {
-      keys.removeAll { $0 == key }
+    for change in changes {
+      if change.on {
+        if !keys.contains(change.key) { keys.append(change.key) }
+      } else if keys.count > 1 {
+        keys.removeAll { $0 == change.key }
+      }
     }
     settings.selectedWindows = orderDraft.orderedSelection(keys)
     settings.hasCustomSelection = true

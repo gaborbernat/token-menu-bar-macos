@@ -81,6 +81,7 @@ public final class UIEnvironment {
   public let historyPresenter: HistoryPresenter
   public let spendSummary = SpendSummaryModel()
   public let disclosures = DisclosureState()
+  let stagedSelection = StagedSelectionChanges()
   public let log: LogBuffer
   public let appInfo: AppInfo
   public let clock: Clock

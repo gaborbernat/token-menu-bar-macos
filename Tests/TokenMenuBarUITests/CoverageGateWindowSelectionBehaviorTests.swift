@@ -146,3 +146,23 @@ private func selectionGateVoidActions(in value: Any, depth: Int = 0) -> [() -> V
     selectionGateVoidActions(in: $0.value, depth: depth + 1)
   }
 }
+
+@Test @MainActor func aProviderGroupToggleAppliesOnceAfterAllItsBindingsAreSet() async throws {
+  let environment = try makeEnvironment()
+  var changes = 0
+  environment.actions.settingsChanged = { changes += 1 }
+  let list = WindowSelectionList(environment: environment)
+  let group = try #require(list.groups.first { $0.rows.count > 1 })
+  let keys = group.rows.map(\.key)
+
+  for key in keys { list.groupSelectionBinding(key).wrappedValue = false }
+  #expect(changes == 0)
+  await mainActorTurn()
+  #expect(changes == 1)
+  #expect(keys.allSatisfy { !environment.settings.selectedWindows.contains($0) })
+
+  for key in keys { list.groupSelectionBinding(key).wrappedValue = true }
+  await mainActorTurn()
+  #expect(changes == 2)
+  #expect(keys.allSatisfy { environment.settings.selectedWindows.contains($0) })
+}
