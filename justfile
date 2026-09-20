@@ -179,7 +179,7 @@ version:
 stamp tag="":
     Scripts/stamp-version.sh {{ tag }}
 
-# Start a release: Prepare Release tags the commit, which triggers the build, the cask and the App Store upload
+# Start a release: Prepare Release tags the commit and dispatches the build, the cask and the App Store upload
 release bump="patch":
     gh workflow run "Prepare Release" --field bump={{ bump }}
     @echo "Watch it with: gh run watch \$(gh run list --workflow 'Prepare Release' --limit 1 --json databaseId -q '.[0].databaseId')"
