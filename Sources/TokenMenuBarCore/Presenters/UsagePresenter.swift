@@ -250,7 +250,7 @@ public enum UsagePresenter {
     }
     let (title, description) = emptyState(provider: provider, state: state)
     let spend = snapshot?.spend.map { spendPresentation($0, provider: provider, now: now) }
-    let credits = creditsPresentation(snapshot?.credits, resetCredits: snapshot?.resetCredits)
+    let credits = creditsPresentation(snapshot?.credits, resetCredits: snapshot?.resetCredits, provider: provider)
     let local = snapshot?.localUsage.map(localPresentation)
     let identity = snapshot?.identity
     let visibleLimits = Set(rows.filter { $0.window.usedPercent >= 100 }.map(\.window.id))
@@ -359,13 +359,17 @@ public enum UsagePresenter {
   }
 
   public static func creditsPresentation(
-    _ credits: CreditBalance?, resetCredits: ResetCredits?
+    _ credits: CreditBalance?, resetCredits: ResetCredits?, provider: ProviderID = .codex
   ) -> UsageCreditsPresentation? {
     var metrics: [UsageMetricPresentation] = []
     if let credits {
       metrics.append(
         UsageMetricPresentation(
-          title: "Credits", value: creditsSummary(credits), help: "Credits extend usage beyond plan limits."))
+          title: "Credits", value: creditsSummary(credits),
+          help: provider == .codex
+            ? "Available usage credits shared by ChatGPT Work and Codex. Credits extend usage beyond plan limits; "
+              + "they are separate from limit-reset credits."
+            : "Credits extend usage beyond plan limits."))
       if credits.overageLimitReached {
         metrics.append(
           UsageMetricPresentation(

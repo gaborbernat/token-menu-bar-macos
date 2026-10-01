@@ -273,8 +273,9 @@ enum CodexMapper {
   static func planName(_ planType: String?) -> String {
     switch planType?.lowercased() {
     case nil, "": "ChatGPT"
-    case "pro": "Pro"
-    case "prolite": "Pro Lite"
+    case "pro": "Pro (More)"
+    case "prolite": "Pro"
+    case "promax": "Pro (Max)"
     case "plus": "Plus"
     case "go": "Go"
     case "free": "Free"
@@ -516,15 +517,19 @@ enum CodexMapper {
       let dateText = row["date"]?.stringValue ?? row["created_at"]?.stringValue ?? row["timestamp"]?.stringValue
       guard let date = dateText.flatMap({ ISODate.parse($0) ?? DayStamp.date($0) }) else { continue }
       guard
-        let used = row["credits_used"]?.doubleValue ?? row["credits"]?.doubleValue ?? row["amount"]?.doubleValue
+        let used = row["credit_amount"]?.doubleValue ?? row["credits_used"]?.doubleValue
+          ?? row["credits"]?.doubleValue ?? row["amount"]?.doubleValue
       else {
         missingAmountCount += 1
         continue
       }
-      let service = row["service"]?.stringValue ?? row["product"]?.stringValue ?? "Codex"
+      let service =
+        row["product_surface"]?.stringValue ?? row["service"]?.stringValue
+        ?? row["product"]?.stringValue ?? "Codex"
       events.append(
         CreditEvent(
-          id: row["id"]?.stringValue ?? "\(dateText!)-\(index)", date: date, service: service, creditsUsed: used))
+          id: row["usage_id"]?.stringValue ?? row["id"]?.stringValue ?? "\(dateText!)-\(index)",
+          date: date, service: service, creditsUsed: used))
     }
     return CreditEventMapping(events: events, missingAmountCount: missingAmountCount)
   }

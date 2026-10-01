@@ -267,11 +267,11 @@ func downsampleHonorsTinyPointBudgets(limit: Int) {
 }
 
 @Test func historyMetricsEncodeSupplierAndMarkRules() {
-  #expect(HistoryMetric.allCases.count == 19)
+  #expect(HistoryMetric.allCases.count == 20)
   #expect(HistoryMetric.allCases.filter { $0.group == .windows }.count == 1)
   #expect(HistoryMetric.allCases.filter { $0.group == .bothProviders }.count == 3)
   #expect(HistoryMetric.allCases.filter { $0.group == .claude }.count == 5)
-  #expect(HistoryMetric.allCases.filter { $0.group == .codex }.count == 8)
+  #expect(HistoryMetric.allCases.filter { $0.group == .codex }.count == 9)
   #expect(HistoryMetric.allCases.filter { $0.group == .projects }.count == 2)
   #expect(HistoryMetric.windowUsagePercent.markKind == .stepLine)
   #expect(HistoryMetric.analytics(.surfaceUsagePercent).markKind == .line)
@@ -297,6 +297,7 @@ func downsampleHonorsTinyPointBudgets(limit: Int) {
     .analytics(.turns): "Codex · by model and surface · daily UTC",
     .analytics(.threads): "Codex · by model and surface · daily UTC",
     .analytics(.credits): "Codex · by model and surface · daily UTC",
+    .analytics(.creditBalance): "Codex · last observed balance · daily UTC",
     .analytics(.skillInvocations): "Codex · by skill · daily UTC",
     .analytics(.pluginInvocations): "Codex · by plugin · daily UTC",
     .analytics(.codeReviews): "Codex · by review type · daily UTC",

@@ -206,7 +206,7 @@ func claudeProvider(
     Issue.record("expected success, got \(result.outcome)")
     return
   }
-  #expect(snapshot.identity?.planName == "Pro")
+  #expect(snapshot.identity?.planName == "Pro (More)")
   #expect(snapshot.window("weekly") != nil)
   #expect(
     snapshot.resetCredits

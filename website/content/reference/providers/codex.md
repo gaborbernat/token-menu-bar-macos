@@ -29,11 +29,29 @@ deadlines; a day-only expiry remains a date.
 Credits, token counts and quota percentages have different units. An exhausted weekly meter does not imply a zero credit
 balance.
 
+[ChatGPT Work and Codex share usage and credits](https://learn.chatgpt.com/docs/pricing). The **Credits** balance
+includes available usage credits that the provider reports, including promotional grants. **Limit resets** are separate
+credits that reset a quota window. Their expiry dates do not establish when usage credits expire; the current balance
+API does not expose usage-credit grant expiries. Check ChatGPT **Settings > Usage** for those dates.
+
+Pro plans have no five-hour limit. The app displays the windows the provider returns, including accounts with only a
+weekly window, and follows changes to the included allowance through the reported percentage. It does not calculate
+subscription limits from API token prices. Pro labels match Codex: **Pro**, **Pro (More)** and **Pro (Max)**.
+
+Select **History > Credit balance** to track the last fetched balance for each UTC day. Recording starts after the app
+fetches a balance; the app does not reconstruct earlier balances from credit purchases or consumption. Missing,
+unlimited and stale local-log balances do not add points. A reported zero does.
+
 ## History and fallback
 
 The API supplies surface usage, model credits, turns, threads, tokens, skills, plugins and code reviews. Input,
 cached-input and output tokens can share a chart with Claude, but Codex may report a total where Claude reports model
 series. Daily aggregates retain UTC buckets; see [History](/reference/history/).
+
+Model names come from the provider, so new releases such as GPT-6 Sol, GPT-6 Luna and GPT-6.1 Sol appear without an app
+update. Usage percentages and reported credits reflect model and speed differences.
+[Conversations with dots](https://learn.chatgpt.com/docs/dots) do not count toward ChatGPT usage limits. Tasks a dot
+starts or manages in Work or Codex count toward those products' limits.
 
 Local rollouts can supply last-known quota while the API is unavailable. These values remain stale until a current fetch
 succeeds. Local records do not establish your subscription bill; a missing monetary cost metric stays absent.

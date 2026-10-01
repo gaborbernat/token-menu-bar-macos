@@ -113,14 +113,27 @@ public actor UsageHistoryStore {
           ]
         ))
     }
+    var recordedBalance = false
     try database.withTransaction {
       try database.executeMany(
         "INSERT OR REPLACE INTO samples (ts, key, label, used, resets_at) VALUES (?, ?, ?, ?, ?)",
         pending.map(\.row))
+      if snapshot.provider == .codex, snapshot.source == .network, let balance = snapshot.credits?.balance,
+        snapshot.credits?.unlimited == false
+      {
+        try database.execute(
+          "INSERT OR REPLACE INTO analytics (provider, day, metric, series, value) VALUES (?, ?, ?, ?, ?)",
+          [
+            .text(snapshot.provider.rawValue), .text(DayStamp.string(snapshot.fetchedAt)),
+            .text(AnalyticsMetric.creditBalance.rawValue), .text("Available credits"),
+            .real(NSDecimalNumber(decimal: balance).doubleValue),
+          ])
+        recordedBalance = true
+      }
     }
     for item in pending { lastRecorded[item.key] = item.sample }
     try pruneIfNeeded(now: now)
-    return pending.count
+    return pending.count + (recordedBalance ? 1 : 0)
   }
 
   public func seed(_ snapshots: [(ProviderSnapshot, Date)]) throws {

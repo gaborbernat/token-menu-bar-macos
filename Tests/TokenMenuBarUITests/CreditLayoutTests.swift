@@ -13,7 +13,7 @@ func resetCreditExpiryKeepsItsTitleAndDateOnSeparateSingleLines(width: CGFloat) 
       CreditBalance(balance: 125, hasCredits: true),
       resetCredits: ResetCredits(
         available: 2, applicable: 1, immediatePurchaseEligible: true,
-        expiries: [ResetCreditExpiry(id: "fixture", expiresAt: fixedNow)])))
+        expiries: [ResetCreditExpiry(id: "fixture", expiresAt: fixedNow)]), provider: .codex))
   let hosting = host(CreditsView(presentation: credits), width: width, height: 300)
   let metrics = creditTooltipAnchors(in: hosting)
   #expect(metrics.count == credits.primaryMetrics.count)

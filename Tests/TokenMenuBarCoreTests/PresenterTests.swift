@@ -34,6 +34,15 @@ func allowancePresentationKeepsRemainingCreditsAndTheirSource(remaining: Decimal
   #expect(presentation.primaryMetrics.first?.value == "0 available")
 }
 
+@Test(arguments: [ProviderID.codex, .gemini])
+func creditBalancePresentationExplainsSharedUsageForCodex(provider: ProviderID) throws {
+  let presentation = try #require(
+    UsagePresenter.creditsPresentation(CreditBalance(balance: 62_500), resetCredits: nil, provider: provider))
+  #expect(presentation.primaryMetrics.map(\.title) == ["Credits"])
+  #expect(presentation.primaryMetrics[0].value == CreditBalance(balance: 62_500).formattedBalance)
+  #expect(presentation.primaryMetrics[0].help.contains("ChatGPT Work and Codex") == (provider == .codex))
+}
+
 @Test func missingCredentialHealthNeverSaysNotChecked() {
   let state = ProviderState(credentialHealth: .missing(expected: []))
   #expect(SettingsProviderPresentation(state: state, now: fixedNow).authentication == "Not found")

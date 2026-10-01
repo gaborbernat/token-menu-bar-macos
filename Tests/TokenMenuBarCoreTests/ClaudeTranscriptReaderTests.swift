@@ -473,6 +473,9 @@ private let millionOfEach = TokenUsage(
 @Test(arguments: [
   ("claude-opus-5", 36.75), ("claude-haiku-4-5-20251001", 7.35), ("claude-sonnet-4-6", 22.05),
   ("Claude-Sonnet-5", 14.7), ("claude-fable-5-1", 72.75),
+  ("claude-opus-5-5", 29.2), ("CLAUDE-OPUS-5-5-20260922", 29.2),
+  ("claude-sonnet-5-5", 14.7), ("claude-sonnet-5-5-20260928", 14.7),
+  ("claude-sonnet-4-5-20250929", 22.05), ("claude-opus-4-5-20251101", 36.75),
 ])
 func pricingMatchesTheLongestModelIdPrefix(model: String, cost: Double) {
   #expect(ClaudePricing.cost(millionOfEach, model: model) == cost)
@@ -480,7 +483,7 @@ func pricingMatchesTheLongestModelIdPrefix(model: String, cost: Double) {
 
 @Test(arguments: ["claude-opus-6", "claude-opus-4-1-20250805"])
 func pricingFallsBackToTheNewestEntryOfTheSameFamily(model: String) {
-  #expect(ClaudePricing.price(for: model) == ClaudePricing.perMillion["claude-opus-5"])
+  #expect(ClaudePricing.price(for: model) == ClaudePricing.perMillion["claude-opus-5-5"])
 }
 
 @Test(arguments: ["gpt-5", "unknown", "claude-zeta-1", "claude"])

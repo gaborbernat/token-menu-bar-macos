@@ -23,12 +23,16 @@ public enum ClaudePricing {
     "claude-mythos-5-1": ModelPrice(input: 10, output: 50, cacheWrite: 12.5, cacheRead: 0.25),
     "claude-fable-5": ModelPrice(input: 10, output: 50, cacheWrite: 12.5, cacheRead: 1),
     "claude-mythos-5": ModelPrice(input: 10, output: 50, cacheWrite: 12.5, cacheRead: 1),
+    "claude-opus-5-5": ModelPrice(input: 4, output: 20, cacheWrite: 5, cacheRead: 0.2),
     "claude-opus-5": ModelPrice(input: 5, output: 25, cacheWrite: 6.25, cacheRead: 0.5),
     "claude-opus-4-8": ModelPrice(input: 5, output: 25, cacheWrite: 6.25, cacheRead: 0.5),
     "claude-opus-4-7": ModelPrice(input: 5, output: 25, cacheWrite: 6.25, cacheRead: 0.5),
     "claude-opus-4-6": ModelPrice(input: 5, output: 25, cacheWrite: 6.25, cacheRead: 0.5),
+    "claude-opus-4-5": ModelPrice(input: 5, output: 25, cacheWrite: 6.25, cacheRead: 0.5),
     "claude-sonnet-5": ModelPrice(input: 2, output: 10, cacheWrite: 2.5, cacheRead: 0.2),
+    "claude-sonnet-5-5": ModelPrice(input: 2, output: 10, cacheWrite: 2.5, cacheRead: 0.2),
     "claude-sonnet-4-6": ModelPrice(input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.3),
+    "claude-sonnet-4-5": ModelPrice(input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.3),
     "claude-haiku-4-5": ModelPrice(input: 1, output: 5, cacheWrite: 1.25, cacheRead: 0.1),
   ]
 
@@ -47,12 +51,16 @@ public enum ClaudePricing {
     return parts[1]
   }
 
-  public static func cost(_ usage: TokenUsage, model: String) -> Double {
+  public static func cost(_ usage: TokenUsage, model: String, speed: String? = nil) -> Double {
     guard let price = price(for: model) else { return 0 }
+    let multiplier =
+      speed == "fast"
+        && ["claude-opus-5", "claude-opus-4-8"].contains(where: { model.lowercased().hasPrefix($0) }) ? 2.0 : 1.0
     return
       (Double(usage.input) * price.input + Double(usage.output) * price.output + Double(usage.cacheWrite)
       * price.cacheWrite
-      + Double(usage.cacheRead) * price.cacheRead) / 1_000_000
+      + Double(usage.cacheRead) * price.cacheRead
+      + Double(usage.cacheWriteOneHour ?? 0) * (2 * price.input - price.cacheWrite)) / 1_000_000 * multiplier
   }
 }
 
@@ -61,12 +69,17 @@ public struct TokenUsage: Sendable, Equatable, Hashable, Codable {
   public var output: Int
   public var cacheWrite: Int
   public var cacheRead: Int
+  /// Included in cacheWrite; optional so checkpoints from before TTL tracking still decode.
+  public var cacheWriteOneHour: Int?
 
-  public init(input: Int = 0, output: Int = 0, cacheWrite: Int = 0, cacheRead: Int = 0) {
+  public init(
+    input: Int = 0, output: Int = 0, cacheWrite: Int = 0, cacheRead: Int = 0, cacheWriteOneHour: Int? = nil
+  ) {
     self.input = input
     self.output = output
     self.cacheWrite = cacheWrite
     self.cacheRead = cacheRead
+    self.cacheWriteOneHour = cacheWriteOneHour
   }
 
   public var total: Int {
@@ -78,6 +91,9 @@ public struct TokenUsage: Sendable, Equatable, Hashable, Codable {
     lhs.output += rhs.output
     lhs.cacheWrite += rhs.cacheWrite
     lhs.cacheRead += rhs.cacheRead
+    if let oneHour = rhs.cacheWriteOneHour {
+      lhs.cacheWriteOneHour = (lhs.cacheWriteOneHour ?? 0) + oneHour
+    }
   }
 }
 
@@ -90,12 +106,13 @@ public struct TranscriptMessage: Sendable, Equatable, Hashable {
   public let toolCalls: Int
   /// The `costUSD` Claude Code wrote on the line, which beats the table when present.
   public let reportedCost: Double?
+  public let speed: String?
   /// The normalized working directory; nil when the line carries none.
   public let project: String?
 
   public init(
     id: String, timestamp: Date, session: String, model: String, usage: TokenUsage, toolCalls: Int,
-    reportedCost: Double? = nil, project: String? = nil
+    reportedCost: Double? = nil, project: String? = nil, speed: String? = nil
   ) {
     self.id = id
     self.timestamp = timestamp
@@ -104,11 +121,12 @@ public struct TranscriptMessage: Sendable, Equatable, Hashable {
     self.usage = usage
     self.toolCalls = toolCalls
     self.reportedCost = reportedCost
+    self.speed = speed
     self.project = project
   }
 
   public var cost: Double {
-    reportedCost ?? ClaudePricing.cost(usage, model: model)
+    reportedCost ?? ClaudePricing.cost(usage, model: model, speed: speed)
   }
 
   public var isCostEstimated: Bool {
@@ -1052,16 +1070,28 @@ public actor ClaudeTranscriptReader {
   private struct Line: Decodable {
     struct Message: Decodable {
       struct Usage: Decodable {
+        struct CacheCreation: Decodable {
+          let oneHourInputTokens: Int?
+
+          enum CodingKeys: String, CodingKey {
+            case oneHourInputTokens = "ephemeral_1h_input_tokens"
+          }
+        }
+
         let inputTokens: Int?
         let outputTokens: Int?
         let cacheCreationInputTokens: Int?
         let cacheReadInputTokens: Int?
+        let cacheCreation: CacheCreation?
+        let speed: String?
 
         enum CodingKeys: String, CodingKey {
           case inputTokens = "input_tokens"
           case outputTokens = "output_tokens"
           case cacheCreationInputTokens = "cache_creation_input_tokens"
           case cacheReadInputTokens = "cache_read_input_tokens"
+          case cacheCreation = "cache_creation"
+          case speed
         }
       }
 
@@ -1101,11 +1131,13 @@ public actor ClaudeTranscriptReader {
         input: usage.inputTokens ?? 0,
         output: usage.outputTokens ?? 0,
         cacheWrite: usage.cacheCreationInputTokens ?? 0,
-        cacheRead: usage.cacheReadInputTokens ?? 0
+        cacheRead: usage.cacheReadInputTokens ?? 0,
+        cacheWriteOneHour: usage.cacheCreation?.oneHourInputTokens
       ),
       toolCalls: message.content?.count { $0.type == "tool_use" } ?? 0,
       reportedCost: json.costUSD,
-      project: json.cwd.map(ProjectIdentity.normalized)
+      project: json.cwd.map(ProjectIdentity.normalized),
+      speed: usage.speed
     )
   }
 

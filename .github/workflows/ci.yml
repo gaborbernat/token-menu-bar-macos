@@ -187,7 +187,7 @@ jobs:
     name: Tests and coverage
     if: ${{ !inputs.ui_group }}
     runs-on: macos-26
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       TOKEN_MENU_BAR_RENDER_CAPTURE_ONLY: 1
     steps:

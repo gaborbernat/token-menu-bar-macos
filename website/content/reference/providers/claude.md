@@ -46,6 +46,17 @@ sessions, tools and project breakdowns. They exclude browser-only activity and w
 Costs estimate API pricing for recorded model usage; they are not your subscription bill. Daily records retain UTC day
 buckets. [History](/reference/history/) explains the timezone and metric controls.
 
+The pricing table includes [Opus 5.5 and Sonnet 5.5](https://platform.claude.com/docs/en/about-claude/pricing). Opus 5.5
+costs $4 per million input tokens and $20 per million output tokens; cache reads cost $0.20. Sonnet 5.5 costs $2/$10,
+with $0.20 cache reads. Sonnet 4.5 and Opus 4.5 keep their own prices for historical usage.
+
+Cost estimates use the transcript's
+[cache lifetime](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) and
+[speed](https://platform.claude.com/docs/en/build-with-claude/fast-mode) when present. One-hour cache writes cost 2
+times the input rate, compared with 1.25 times for five-minute writes. Supported Opus Fast mode costs twice the standard
+rate, including caching. A cost that Claude Code reports takes precedence over the estimate. Transcripts without
+cache-lifetime or speed information use five-minute caching and standard speed.
+
 ## Expired credentials
 
 Use **Sign in…** to open the detected client's recovery route. Cached quota turns gray until a fetch succeeds; local

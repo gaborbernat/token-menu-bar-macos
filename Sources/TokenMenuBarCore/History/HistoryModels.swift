@@ -87,7 +87,7 @@ public enum HistoryMetric: Sendable, Hashable, Identifiable {
   public var markKind: HistoryMarkKind {
     switch self {
     case .windowUsagePercent: .stepLine
-    case .analytics(.surfaceUsagePercent): .line
+    case .analytics(.surfaceUsagePercent), .analytics(.creditBalance): .line
     case .analytics: .bars
     }
   }
@@ -98,14 +98,14 @@ public enum HistoryMetric: Sendable, Hashable, Identifiable {
     case .analytics(.inputTokens), .analytics(.cachedInputTokens), .analytics(.outputTokens),
       .analytics(.cacheWriteTokens):
       .tokens
-    case .analytics(.modelCredits), .analytics(.credits): .credits
+    case .analytics(.modelCredits), .analytics(.credits), .analytics(.creditBalance): .credits
     case .analytics(.costUSD), .analytics(.projectCost): .usd
     case .analytics: .count
     }
   }
 
   public var summaryKind: HistorySummaryKind {
-    unit == .percentage ? .latest : .sum
+    unit == .percentage || self == .analytics(.creditBalance) ? .latest : .sum
   }
 
   public var supportsStacking: Bool {
@@ -137,6 +137,8 @@ public enum HistoryMetric: Sendable, Hashable, Identifiable {
       "Codex · by surface · daily UTC"
     case .analytics(.modelCredits):
       "Codex · by model · daily UTC"
+    case .analytics(.creditBalance):
+      "Codex · last observed balance · daily UTC"
     case .analytics(.turns), .analytics(.threads), .analytics(.credits):
       "Codex · by model and surface · daily UTC"
     case .analytics(.skillInvocations):

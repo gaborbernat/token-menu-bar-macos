@@ -107,6 +107,20 @@ private func codexSnapshot(usage: StubTransport.Response) async -> ProviderSnaps
   #expect(snapshot.windows.isEmpty)
 }
 
+@Test(arguments: ["prolite", "pro", "promax"])
+func codexProPreservesWeeklyOnlyUsageAndPromotionalCreditBalances(plan: String) async throws {
+  let snapshot = try #require(
+    await codexSnapshot(
+      usage: .text(
+        #"""
+        {"plan_type":"\#(plan)","rate_limit":{"primary_window":null,
+          "secondary_window":{"used_percent":25,"limit_window_seconds":604800}},
+          "credits":{"has_credits":true,"unlimited":false,"balance":"62500"}}
+        """#)))
+  #expect(snapshot.windows.map(\.id) == ["weekly"])
+  #expect(snapshot.credits == CreditBalance(balance: 62_500, hasCredits: true))
+}
+
 @Test func codexTreatsAWindowWithoutADurationAsTheSession() async throws {
   let usage = #"{"rate_limit": {"primary_window": {"used_percent": 3}}}"#
   let snapshot = try #require(await codexSnapshot(usage: .text(usage)))
@@ -215,7 +229,7 @@ func codexReportsNoSpendWithoutALimit(usage: String) async throws {
 
 @Test(
   arguments: [
-    ("", "ChatGPT"), ("pro", "Pro"), ("prolite", "Pro Lite"), ("plus", "Plus"),
+    ("", "ChatGPT"), ("pro", "Pro (More)"), ("prolite", "Pro"), ("promax", "Pro (Max)"), ("plus", "Plus"),
     ("go", "Go"), ("free", "Free"), ("team", "Team"), ("free_workspace", "Team"), ("business", "Business"),
     ("self_serve_business_prolite", "Business"), ("enterprise", "Enterprise"), ("edu", "Education"),
     ("education", "Education"), ("k12", "K12"), ("quorum_plus", "Quorum Plus"),
@@ -227,13 +241,13 @@ func codexNamesThePlanFromItsType(planType: String, expected: String) async thro
 
 @Test func codexFallsBackToThePlanInTheToken() async throws {
   let snapshot = try #require(await codexSnapshot(usage: .text("{}")))
-  #expect(snapshot.identity?.planName == "Pro")
+  #expect(snapshot.identity?.planName == "Pro (More)")
 }
 
 @Test func codexIdentityMergesTheResponseAndTheToken() async throws {
   let snapshot = try #require(await codexSnapshot(usage: .json("codex_usage")))
   let identity = try #require(snapshot.identity)
-  #expect(identity.planName == "Pro")
+  #expect(identity.planName == "Pro (More)")
   #expect(identity.tier == "pro")
   #expect(identity.email == "user@example.com")
   #expect(identity.subscriptionActiveUntil == CodexAuth(document: Fixtures.codexAuth())?.subscriptionActiveUntil)
@@ -254,6 +268,19 @@ private func codexAnalytics(_ stub: @escaping (StubTransport) -> Void = { _ in }
   let points = try #require(await codexAnalytics()).points.filter { $0.day == "2026-08-29" }
   #expect(points.first { $0.metric == .surfaceUsagePercent && $0.series == "cli" }?.value.rounded() == 38)
   #expect(points.contains { $0.metric == .modelCredits && $0.series == "gpt-5.6-sol" })
+}
+
+@Test(arguments: ["gpt-6-sol", "gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra"])
+func codexPreservesNewModelNamesInUsageAnalytics(model: String) async throws {
+  let analytics = try #require(
+    await codexAnalytics {
+      $0.on(
+        path: "daily-token-usage-breakdown",
+        .text(#"{"data":[{"date":"2026-08-29","models":[{"model":"\#(model)","credits":2.5}]}]}"#))
+    })
+  #expect(
+    analytics.points.filter { $0.metric == .modelCredits }
+      == [AnalyticsPoint(day: "2026-08-29", metric: .modelCredits, series: model, value: 2.5)])
 }
 
 @Test func codexAnalyticsSkipARowWithoutUsage() async throws {
@@ -330,6 +357,20 @@ private func codexAnalytics(_ stub: @escaping (StubTransport) -> Void = { _ in }
   }
   #expect(result.analytics?.creditEvents.isEmpty == true)
   #expect(result.warnings.contains("Skipped 1 Codex credit event without a credit amount."))
+}
+
+@Test func codexCreditEventsPreserveTheCurrentBackendSchema() async throws {
+  let rows = #"""
+    {"data":[{"usage_id":"work","date":"2026-08-29","product_surface":"CHATGPT",
+      "credit_amount":12.5},{"usage_id":"cli","date":"2026-08-29","product_surface":"CODEX_CLI",
+      "credit_amount":3.25}]}
+    """#
+  let analytics = try #require(await codexAnalytics { $0.on(path: "credit-usage-events", .text(rows)) })
+  #expect(
+    analytics.creditEvents == [
+      CreditEvent(id: "work", date: DayStamp.date("2026-08-29")!, service: "CHATGPT", creditsUsed: 12.5),
+      CreditEvent(id: "cli", date: DayStamp.date("2026-08-29")!, service: "CODEX_CLI", creditsUsed: 3.25),
+    ])
 }
 
 @Test func codexAsksEachAnalyticsEndpointForTheRangeItNeeds() async throws {

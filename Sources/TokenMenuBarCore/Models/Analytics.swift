@@ -6,6 +6,7 @@ public enum AnalyticsMetric: String, Codable, CaseIterable, Sendable, Hashable {
   case turns
   case threads
   case credits
+  case creditBalance
   case inputTokens
   case cachedInputTokens
   case outputTokens
@@ -27,6 +28,7 @@ public enum AnalyticsMetric: String, Codable, CaseIterable, Sendable, Hashable {
     case .turns: "Turns"
     case .threads: "Threads"
     case .credits: "Credits"
+    case .creditBalance: "Credit balance"
     case .inputTokens: "Input tokens"
     case .cachedInputTokens: "Cached input tokens"
     case .outputTokens: "Output tokens"
@@ -46,7 +48,7 @@ public enum AnalyticsMetric: String, Codable, CaseIterable, Sendable, Hashable {
   public var unit: String {
     switch self {
     case .surfaceUsagePercent: "%"
-    case .modelCredits, .credits: "credits"
+    case .modelCredits, .credits, .creditBalance: "credits"
     case .inputTokens, .cachedInputTokens, .outputTokens, .cacheWriteTokens: "tokens"
     case .costUSD, .projectCost: "USD"
     default: "count"
