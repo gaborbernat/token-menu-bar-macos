@@ -175,7 +175,8 @@ public final class StatusItemController {
   }
 
   nonisolated func appearanceChanged() {
-    Task { @MainActor in render(force: true) }
+    // macOS 27 reports appearance changes during status snapshots, including unchanged color schemes.
+    Task { @MainActor in render(force: false) }
   }
 
   public var isDark: Bool {
