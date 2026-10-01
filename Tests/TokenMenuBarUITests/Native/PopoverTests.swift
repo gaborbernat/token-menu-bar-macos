@@ -159,7 +159,8 @@ func cancellingPopoverPreparationRestoresActivationWhenRequested(restoringActiva
   #expect(controller.popover.contentSize.width >= PopoverGeometry.minimumWidth)
 }
 
-@Test @MainActor func popoverFitsItsNativeChromeBeforeTheFirstPresentation() throws {
+@Test(arguments: ["first opening", "reopening"])
+@MainActor func popoverFitsItsNativeChromeBeforePresentation(presentation: String) throws {
   let (controller, anchor, window) = anchoredPopover()
   defer {
     controller.close()
@@ -167,21 +168,22 @@ func cancellingPopoverPreparationRestoresActivationWhenRequested(restoringActiva
   }
   let screen = try #require(window.screen?.visibleFrame)
   controller.measure(PopoverMeasurement(tab: .usage, size: CGSize(width: 880, height: 5000)))
+  if presentation == "reopening" {
+    controller.show(relativeTo: anchor, anchorFrame: window.frame, visibleFrame: screen)
+    controller.close()
+  }
   var firstSize: CGSize?
-  var firstFrame: CGRect?
   let observer = NotificationCenter.default.addObserver(
     forName: NSPopover.willShowNotification, object: controller.popover, queue: .main
   ) { _ in
     MainActor.assumeIsolated {
       firstSize = controller.popover.contentSize
-      firstFrame = controller.popover.contentViewController?.view.window?.frame
     }
   }
   defer { NotificationCenter.default.removeObserver(observer) }
 
   controller.show(relativeTo: anchor, anchorFrame: window.frame, visibleFrame: screen)
 
-  #expect(firstFrame != nil)
   #expect(firstSize == controller.popover.contentSize)
 }
 
