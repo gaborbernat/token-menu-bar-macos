@@ -490,7 +490,7 @@ private final class ResumableClock: @unchecked Sendable {
   defer { controller.remove() }
   let button = try #require(controller.item.button)
   button.appearance = NSAppearance(named: initial)
-  controller.update(statusModel(format: .stacked))
+  controller.update(.empty)
   await mainActorTurn()
   let image = try #require(button.image)
 
