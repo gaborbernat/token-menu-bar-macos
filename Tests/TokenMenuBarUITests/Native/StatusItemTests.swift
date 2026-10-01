@@ -478,8 +478,10 @@ private final class ResumableClock: @unchecked Sendable {
 
 @Test(
   arguments: [
-    (NSAppearance.Name.aqua, .vibrantLight, false), (.darkAqua, .vibrantDark, false),
-    (.aqua, .darkAqua, true), (.darkAqua, .aqua, true),
+    (NSAppearance.Name.aqua, NSAppearance.Name.vibrantLight, false),
+    (NSAppearance.Name.darkAqua, NSAppearance.Name.vibrantDark, false),
+    (NSAppearance.Name.aqua, NSAppearance.Name.darkAqua, true),
+    (NSAppearance.Name.darkAqua, NSAppearance.Name.aqua, true),
   ])
 @MainActor func statusItemRedrawsOnlyForColorSchemeChanges(
   initial: NSAppearance.Name, updated: NSAppearance.Name, changesColorScheme: Bool
