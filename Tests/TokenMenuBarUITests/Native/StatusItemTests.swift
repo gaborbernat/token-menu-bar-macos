@@ -476,6 +476,30 @@ private final class ResumableClock: @unchecked Sendable {
   #expect(controller.isDark)
 }
 
+@Test(
+  arguments: [
+    (NSAppearance.Name.aqua, NSAppearance.Name.vibrantLight, false),
+    (NSAppearance.Name.darkAqua, NSAppearance.Name.vibrantDark, false),
+    (NSAppearance.Name.aqua, NSAppearance.Name.darkAqua, true),
+    (NSAppearance.Name.darkAqua, NSAppearance.Name.aqua, true),
+  ])
+@MainActor func statusItemRedrawsOnlyForColorSchemeChanges(
+  initial: NSAppearance.Name, updated: NSAppearance.Name, changesColorScheme: Bool
+) async throws {
+  let controller = statusController()
+  defer { controller.remove() }
+  let button = try #require(controller.item.button)
+  button.appearance = NSAppearance(named: initial)
+  controller.update(.empty)
+  await mainActorTurn()
+  let image = try #require(button.image)
+
+  button.appearance = NSAppearance(named: updated)
+  await mainActorTurn()
+
+  #expect((button.image !== image) == changesColorScheme)
+}
+
 @Test @MainActor func statusItemKeepsTheContextOfTheAppBehindIt() {
   let controller = StatusItemController(log: makeLog(), autosaveName: nil, presentMenu: { _ in })
   defer { controller.remove() }

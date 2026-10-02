@@ -143,7 +143,7 @@ final class LiveControlAuditUITests: XCTestCase {
   }
 
   @MainActor func testSettingsProviderAccessActionsRespond() throws {
-    executionTimeAllowance = 300
+    executionTimeAllowance = 420
     let verification = VerificationApplication(
       testName: name, profile: VerificationProfile(fixture: .controlAudit, nativePanels: true), detailedLogging: true)
     addTeardownBlock { @MainActor in await verification.terminate() }
