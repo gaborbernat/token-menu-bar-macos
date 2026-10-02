@@ -70,7 +70,7 @@ public struct TokenUsage: Sendable, Equatable, Hashable, Codable {
   public var cacheWrite: Int
   public var cacheRead: Int
   /// Included in cacheWrite; optional so checkpoints from before TTL tracking still decode.
-  public var cacheWriteOneHour: Int?
+  fileprivate var cacheWriteOneHour: Int?
 
   public init(
     input: Int = 0, output: Int = 0, cacheWrite: Int = 0, cacheRead: Int = 0, cacheWriteOneHour: Int? = nil
@@ -106,7 +106,7 @@ public struct TranscriptMessage: Sendable, Equatable, Hashable {
   public let toolCalls: Int
   /// The `costUSD` Claude Code wrote on the line, which beats the table when present.
   public let reportedCost: Double?
-  public let speed: String?
+  private let speed: String?
   /// The normalized working directory; nil when the line carries none.
   public let project: String?
 
