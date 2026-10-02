@@ -117,8 +117,8 @@ func codexProPreservesWeeklyOnlyUsageAndPromotionalCreditBalances(plan: String) 
           "secondary_window":{"used_percent":25,"limit_window_seconds":604800}},
           "credits":{"has_credits":true,"unlimited":false,"balance":"62500"}}
         """#)))
-  #expect(snapshot.windows.map(\.id) == ["weekly"])
-  #expect(snapshot.credits == CreditBalance(balance: 62_500, hasCredits: true))
+  #expect(
+    (snapshot.windows.map(\.id), snapshot.credits) == (["weekly"], CreditBalance(balance: 62_500, hasCredits: true)))
 }
 
 @Test func codexTreatsAWindowWithoutADurationAsTheSession() async throws {

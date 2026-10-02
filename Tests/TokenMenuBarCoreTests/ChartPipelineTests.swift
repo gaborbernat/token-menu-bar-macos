@@ -267,12 +267,9 @@ func downsampleHonorsTinyPointBudgets(limit: Int) {
 }
 
 @Test func historyMetricsEncodeSupplierAndMarkRules() {
-  #expect(HistoryMetric.allCases.count == 20)
-  #expect(HistoryMetric.allCases.filter { $0.group == .windows }.count == 1)
-  #expect(HistoryMetric.allCases.filter { $0.group == .bothProviders }.count == 3)
-  #expect(HistoryMetric.allCases.filter { $0.group == .claude }.count == 5)
-  #expect(HistoryMetric.allCases.filter { $0.group == .codex }.count == 9)
-  #expect(HistoryMetric.allCases.filter { $0.group == .projects }.count == 2)
+  #expect(
+    Dictionary(grouping: HistoryMetric.allCases, by: \.group).mapValues(\.count)
+      == [.windows: 1, .bothProviders: 3, .claude: 5, .codex: 9, .projects: 2])
   #expect(HistoryMetric.windowUsagePercent.markKind == .stepLine)
   #expect(HistoryMetric.analytics(.surfaceUsagePercent).markKind == .line)
   #expect(HistoryMetric.analytics(.turns).markKind == .bars)

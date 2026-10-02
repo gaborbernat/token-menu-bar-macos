@@ -20,9 +20,7 @@ import TokenMenuBarTestSupport
   let chart = ChartPipeline.renderAnalytics(
     rows: rows, metric: .analytics(.creditBalance), start: fixedNow, end: fixedNow.addingTimeInterval(86400))
   #expect(chart.series.map(\.summaryValue) == [0])
-  #expect(chart.metric.summaryKind == .latest)
-  #expect(chart.metric.markKind == .line)
-  #expect(chart.metric.unit == .credits)
+  #expect((chart.metric.summaryKind, chart.metric.markKind, chart.metric.unit) == (.latest, .line, .credits))
 }
 
 @Test(arguments: [
