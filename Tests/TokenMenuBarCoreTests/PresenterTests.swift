@@ -34,13 +34,21 @@ func allowancePresentationKeepsRemainingCreditsAndTheirSource(remaining: Decimal
   #expect(presentation.primaryMetrics.first?.value == "0 available")
 }
 
-@Test(arguments: [ProviderID.codex, .gemini])
-func creditBalancePresentationExplainsSharedUsageForCodex(provider: ProviderID) throws {
+@Test(arguments: [
+  (
+    ProviderID.codex,
+    "Available usage credits shared by ChatGPT Work and Codex. Credits extend usage beyond plan limits; "
+      + "they are separate from limit-reset credits."
+  ),
+  (.gemini, "Credits extend usage beyond plan limits."),
+])
+func creditBalancePresentationExplainsSharedUsageForCodex(provider: ProviderID, help: String) throws {
   let presentation = try #require(
     UsagePresenter.creditsPresentation(CreditBalance(balance: 62_500), resetCredits: nil, provider: provider))
-  #expect(presentation.primaryMetrics.map(\.title) == ["Credits"])
-  #expect(presentation.primaryMetrics[0].value == CreditBalance(balance: 62_500).formattedBalance)
-  #expect(presentation.primaryMetrics[0].help.contains("ChatGPT Work and Codex") == (provider == .codex))
+  #expect(
+    presentation.primaryMetrics == [
+      UsageMetricPresentation(title: "Credits", value: CreditBalance(balance: 62_500).formattedBalance, help: help)
+    ])
 }
 
 @Test func missingCredentialHealthNeverSaysNotChecked() {

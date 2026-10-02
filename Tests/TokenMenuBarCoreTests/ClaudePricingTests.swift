@@ -29,8 +29,8 @@ func claudeTranscriptCostsIncludeCacheLifetimeAndSpeed(
   try (record.replacingOccurrences(of: "\n", with: "") + "\n").write(
     to: root.appendingPathComponent("projects/session.jsonl"), atomically: true, encoding: .utf8)
   let snapshot = await ClaudeTranscriptReader(root: root).refresh(now: fixedNow)
-  #expect(snapshot.localUsage(windowResetsAt: nil, windowDuration: 86400, now: fixedNow)?.todayCost == expectedCost)
-  #expect(snapshot.localUsage(windowResetsAt: nil, windowDuration: 86400, now: fixedNow)?.todayTokens == 4_000_000)
+  let usage = try #require(snapshot.localUsage(windowResetsAt: nil, windowDuration: 86400, now: fixedNow))
+  #expect((usage.todayCost, usage.todayTokens) == (expectedCost, 4_000_000))
   #expect(snapshot.analytics(now: fixedNow)?.points.first { $0.metric == .costUSD }?.value == expectedCost)
 }
 

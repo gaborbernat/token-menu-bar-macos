@@ -1070,14 +1070,6 @@ public actor ClaudeTranscriptReader {
   private struct Line: Decodable {
     struct Message: Decodable {
       struct Usage: Decodable {
-        struct CacheCreation: Decodable {
-          let oneHourInputTokens: Int?
-
-          enum CodingKeys: String, CodingKey {
-            case oneHourInputTokens = "ephemeral_1h_input_tokens"
-          }
-        }
-
         let inputTokens: Int?
         let outputTokens: Int?
         let cacheCreationInputTokens: Int?
@@ -1092,6 +1084,14 @@ public actor ClaudeTranscriptReader {
           case cacheReadInputTokens = "cache_read_input_tokens"
           case cacheCreation = "cache_creation"
           case speed
+        }
+
+        struct CacheCreation: Decodable {
+          let oneHourInputTokens: Int?
+
+          enum CodingKeys: String, CodingKey {
+            case oneHourInputTokens = "ephemeral_1h_input_tokens"
+          }
         }
       }
 
