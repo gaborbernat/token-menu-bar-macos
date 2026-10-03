@@ -28,10 +28,10 @@ repos:
         # website/layouts holds Hugo templates rather than prose, and reflowing a shortcode breaks the build
         exclude: ^(website/layouts|review\.md)
         additional_dependencies:
-          - mdformat-gfm==1.0.0
-          - mdformat-hugo==0.3.0
-          - mdformat-beautysh==1.0.0
-          - mdformat-simple-breaks==0.1.0
+          - mdformat-gfm==1
+          - mdformat-hugo==0.3
+          - mdformat-beautysh==1
+          - mdformat-simple-breaks==0.1
   # shellcheck-py rather than the upstream hook: pre-commit.ci has no Docker
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1-1
@@ -44,7 +44,7 @@ repos:
       - id: shfmt
         args: ["--indent", "2", "--case-indent", "--space-redirects", "--write"]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.9
+    rev: v0.16.10
     hooks:
       - id: ruff-format
       - id: ruff-check
@@ -93,7 +93,7 @@ repos:
         name: justfile formatting
         entry: just --unstable --fmt --check --justfile
         language: python
-        additional_dependencies: [rust-just==1.58.0]
+        additional_dependencies: [rust-just==1.58]
         files: ^justfile$
         pass_filenames: false
         args: [justfile]
