@@ -20,7 +20,7 @@ jobs:
   tag:
     name: Tag the release
     if: github.repository == 'tox-dev/token-menu-bar-macos'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: write
     outputs:
@@ -75,7 +75,7 @@ jobs:
   release:
     name: Start the release
     needs: tag
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
     steps:

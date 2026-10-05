@@ -44,7 +44,7 @@ concurrency:
 jobs:
   runtime-matrix:
     name: Select deployed macOS runtimes
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 2
     outputs:
       runtimes: ${{ steps.matrix.outputs.runtimes }}
@@ -86,7 +86,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
-          version: 2026.9.3
+          version: 2026.10.0
       - name: Select Xcode
         run: Scripts/select-xcode.sh
       - name: Run every hook
@@ -128,7 +128,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
-          version: 2026.9.3
+          version: 2026.10.0
       - name: Select Xcode
         id: xcode
         env:
@@ -201,7 +201,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
-          version: 2026.9.3
+          version: 2026.10.0
       - name: Select Xcode
         id: xcode
         run: |
@@ -336,7 +336,7 @@ jobs:
           persist-credentials: false
       - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
-          version: 2026.9.3
+          version: 2026.10.0
       - name: Select Xcode
         id: xcode
         env:
