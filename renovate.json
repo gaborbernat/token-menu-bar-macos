@@ -3,7 +3,8 @@
   "extends": [
     "config:recommended",
     "helpers:pinGitHubActionDigests",
-    ":preserveSemverRanges"
+    ":preserveSemverRanges",
+    ":disableDependencyDashboard"
   ],
   "timezone": "Europe/London",
   "minimumReleaseAge": "3 days",
